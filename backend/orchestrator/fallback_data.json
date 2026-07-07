@@ -1,0 +1,209 @@
+{
+  "samples": [
+    {
+      "idea": "Build an HRMS startup",
+      "domain": "HRMS",
+      "idea_context": {
+        "domain": "HRMS",
+        "audience": "small and mid-sized businesses with lean HR teams",
+        "problem": "HR teams need a simpler way to manage employee data, onboarding, leave, and performance without enterprise software complexity.",
+        "constraints": [
+          "must handle sensitive employee data",
+          "must be usable by non-technical HR staff",
+          "must prove value against crowded HR software alternatives"
+        ],
+        "keywords": ["HRMS", "onboarding", "leave management", "performance", "SMB"]
+      },
+      "round1": {
+        "pm": {
+          "problem": "SMB HR teams are stuck between spreadsheets and expensive enterprise HR suites.",
+          "target_users": ["HR managers", "founders", "operations leads"],
+          "solution": "A lightweight AI-assisted HRMS that centralizes employee records, onboarding tasks, leave requests, and performance check-ins.",
+          "mvp_features": [
+            "employee directory",
+            "onboarding checklist builder",
+            "leave request workflow",
+            "performance review templates",
+            "HR policy assistant",
+            "basic analytics dashboard"
+          ],
+          "user_journey": [
+            "admin creates company workspace",
+            "admin imports employee records",
+            "HR creates onboarding and leave policies",
+            "employees submit requests",
+            "HR tracks status and metrics"
+          ],
+          "success_metrics": ["activation rate", "weekly HR task completion", "leave request turnaround time", "paid conversion"],
+          "risks": ["crowded market", "compliance expectations", "data migration friction"]
+        },
+        "ui": {
+          "design_goal": "Make routine HR work feel organized, fast, and low-friction.",
+          "screens": [
+            {
+              "name": "Dashboard",
+              "purpose": "Show pending HR work and workforce status",
+              "key_components": ["task queue", "leave summary", "onboarding progress", "alerts"]
+            },
+            {
+              "name": "Employee Profile",
+              "purpose": "Centralize employee details and activity",
+              "key_components": ["profile header", "documents", "leave history", "review notes"]
+            },
+            {
+              "name": "Onboarding Builder",
+              "purpose": "Create reusable onboarding flows",
+              "key_components": ["template list", "task editor", "assignee controls"]
+            }
+          ],
+          "information_architecture": ["Dashboard", "People", "Onboarding", "Leave", "Reviews", "Settings"],
+          "visual_style": {
+            "tone": "calm operational SaaS",
+            "colors": ["#1F2937", "#2563EB", "#10B981", "#F9FAFB"],
+            "typography": "clean sans-serif with compact dashboard hierarchy"
+          },
+          "wireframe_notes": ["left sidebar navigation", "dense table views", "status chips", "right-side detail drawer"]
+        },
+        "backend": {
+          "architecture": "FastAPI service with relational persistence, role-based access, and modular HR workflow services.",
+          "entities": [
+            {"name": "Company", "fields": ["id:uuid", "name:string", "plan:string"]},
+            {"name": "Employee", "fields": ["id:uuid", "company_id:uuid", "name:string", "email:string", "role:string"]},
+            {"name": "LeaveRequest", "fields": ["id:uuid", "employee_id:uuid", "start_date:date", "end_date:date", "status:string"]},
+            {"name": "OnboardingTask", "fields": ["id:uuid", "employee_id:uuid", "title:string", "completed:boolean"]}
+          ],
+          "api_endpoints": [
+            {"method": "POST", "path": "/companies", "purpose": "create workspace"},
+            {"method": "GET", "path": "/employees", "purpose": "list employees"},
+            {"method": "POST", "path": "/employees", "purpose": "add employee"},
+            {"method": "POST", "path": "/leave-requests", "purpose": "submit leave request"},
+            {"method": "PATCH", "path": "/leave-requests/{id}", "purpose": "approve or reject leave"},
+            {"method": "GET", "path": "/analytics/hr", "purpose": "show HR dashboard metrics"}
+          ],
+          "integrations": ["email notifications", "calendar sync", "document storage"],
+          "data_privacy": ["encrypt sensitive fields", "role-based permissions", "audit log for HR actions"],
+          "technical_risks": ["multi-tenant isolation", "compliance requirements", "import quality from spreadsheets"]
+        },
+        "marketing": {
+          "positioning": "The simple AI-assisted HRMS for growing teams that have outgrown spreadsheets.",
+          "value_props": [
+            "launch core HR workflows in one day",
+            "reduce repetitive HR admin",
+            "give employees a self-service HR hub",
+            "avoid enterprise HR suite complexity"
+          ],
+          "channels": ["founder communities", "HR newsletters", "LinkedIn outbound", "startup accelerators", "SMB accounting partners"],
+          "launch_plan": ["pilot with 5 SMBs", "publish HR spreadsheet migration guide", "offer concierge onboarding", "convert pilots to paid annual plans"],
+          "competitors": ["BambooHR", "Gusto", "Zoho People", "spreadsheets"],
+          "messaging": {
+            "tagline": "HR operations without the enterprise drag.",
+            "elevator_pitch": "This HRMS gives growing companies a fast way to manage people operations without buying a heavy suite. It combines employee records, onboarding, leave, and reviews with AI assistance for routine HR work."
+          }
+        }
+      },
+      "round2_critique": {
+        "investor_concerns": [
+          {
+            "agent": "marketing",
+            "severity": "medium",
+            "issue": "The market is crowded and the positioning needs a sharper wedge.",
+            "recommended_revision": "Focus initial positioning on spreadsheet-to-HRMS migration for 20-150 employee companies."
+          }
+        ],
+        "skeptic_flags": [
+          {
+            "agent": "backend",
+            "severity": "high",
+            "issue": "Sensitive HR data requires stronger security and auditability details.",
+            "recommended_revision": "Add audit logs, encryption, least-privilege roles, and tenant isolation as MVP requirements."
+          }
+        ],
+        "revisions": {},
+        "investment_thesis": "Promising if it starts with a narrow SMB migration wedge and proves retention through daily HR workflows.",
+        "ask_readiness": "medium",
+        "killer_questions": ["Why will buyers switch from existing HR tools?", "How will the product handle compliance across regions?"],
+        "overall_risk": "medium"
+      },
+      "startup_score": {
+        "feasibility": 7,
+        "market_size": 8,
+        "differentiation": 6,
+        "team_fit": 7
+      }
+    },
+    {
+      "idea": "AI meal planner for diabetic patients",
+      "domain": "Digital Health",
+      "idea_context": {
+        "domain": "Digital Health",
+        "audience": "diabetic patients and caregivers",
+        "problem": "Patients need easier meal planning that respects glucose goals, preferences, and budget.",
+        "constraints": ["medical safety", "nutrition accuracy", "clear non-diagnostic positioning"],
+        "keywords": ["diabetes", "meal planning", "nutrition", "caregivers"]
+      },
+      "round1": {
+        "pm": {
+          "problem": "Diabetic patients struggle to translate nutrition advice into daily meals.",
+          "target_users": ["type 2 diabetic patients", "caregivers", "dietitians"],
+          "solution": "A guided meal planner that suggests grocery lists and recipes aligned with user constraints.",
+          "mvp_features": ["profile setup", "meal suggestions", "grocery list", "recipe swaps", "dietitian export"],
+          "user_journey": ["set profile", "choose meal goals", "review plan", "swap meals", "export list"],
+          "success_metrics": ["weekly plan completion", "recipe saves", "retention", "dietitian referrals"],
+          "risks": ["medical claim risk", "nutrition trust", "personalization quality"]
+        },
+        "ui": {
+          "design_goal": "Make health-conscious meal planning reassuring and easy to adjust.",
+          "screens": [
+            {"name": "Plan", "purpose": "Show weekly meals", "key_components": ["calendar", "meal cards", "swap button"]},
+            {"name": "Recipe", "purpose": "Explain ingredients and nutrition", "key_components": ["nutrition panel", "instructions", "warnings"]}
+          ],
+          "information_architecture": ["Plan", "Recipes", "Grocery", "Profile"],
+          "visual_style": {"tone": "trustworthy and calm", "colors": ["#0F766E", "#F8FAFC", "#F59E0B"], "typography": "readable sans-serif"},
+          "wireframe_notes": ["large meal cards", "clear nutrition labels", "low-friction substitutions"]
+        },
+        "backend": {
+          "architecture": "API service with user preferences, recipe catalog, and meal-plan generation workflows.",
+          "entities": [
+            {"name": "UserProfile", "fields": ["id:uuid", "dietary_preferences:string[]", "budget:number"]},
+            {"name": "Recipe", "fields": ["id:uuid", "name:string", "nutrition:json"]},
+            {"name": "MealPlan", "fields": ["id:uuid", "user_id:uuid", "week_start:date", "meals:json"]}
+          ],
+          "api_endpoints": [
+            {"method": "POST", "path": "/profiles", "purpose": "create profile"},
+            {"method": "POST", "path": "/meal-plans", "purpose": "generate meal plan"},
+            {"method": "PATCH", "path": "/meal-plans/{id}/swap", "purpose": "swap a meal"}
+          ],
+          "integrations": ["nutrition database", "grocery pricing API"],
+          "data_privacy": ["minimize health data", "explicit consent", "secure storage"],
+          "technical_risks": ["nutrition data quality", "medical safety boundaries"]
+        },
+        "marketing": {
+          "positioning": "Practical meal planning for people managing diabetes day to day.",
+          "value_props": ["less planning stress", "personalized grocery lists", "easy meal swaps"],
+          "channels": ["dietitian partnerships", "diabetes communities", "caregiver content"],
+          "launch_plan": ["pilot with dietitians", "validate meal adherence", "publish recipe packs"],
+          "competitors": ["MyFitnessPal", "PlateJoy", "generic recipe apps"],
+          "messaging": {
+            "tagline": "Meals that fit your day and your glucose goals.",
+            "elevator_pitch": "The product helps diabetic patients plan practical meals with clearer nutrition context. It is a planning aid, not a medical diagnosis tool."
+          }
+        }
+      },
+      "round2_critique": {
+        "investor_concerns": [],
+        "skeptic_flags": [],
+        "revisions": {},
+        "investment_thesis": "Worth exploring through clinician-adjacent pilots, with careful claim boundaries.",
+        "ask_readiness": "medium",
+        "killer_questions": ["How will nutrition accuracy be validated?", "What medical claims are avoided?"],
+        "overall_risk": "high"
+      },
+      "startup_score": {
+        "feasibility": 6,
+        "market_size": 8,
+        "differentiation": 6,
+        "team_fit": 6
+      }
+    }
+  ]
+}
