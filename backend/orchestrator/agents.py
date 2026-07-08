@@ -5,11 +5,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from typing import Any
 
 from . import prompts
 
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MAX_RETRIES = 5
+RETRY_CODES = {429, 503}
 
 
 class AgentCallError(RuntimeError):
@@ -69,19 +72,34 @@ def call_agent(
         ) from exc
 
     client = genai.Client(api_key=api_key or _api_key_for(agent_name))
-    response = client.models.generate_content(
-        model=model or DEFAULT_MODEL,
-        contents=json.dumps(input_json, ensure_ascii=True),
-        config=types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            response_mime_type="application/json",
-            temperature=0.4,
-        ),
-    )
 
-    if not response.text:
-        raise AgentCallError("Gemini returned an empty response.")
-    return _extract_json(response.text)
+    last_exc: Exception | None = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = client.models.generate_content(
+                model=model or DEFAULT_MODEL,
+                contents=json.dumps(input_json, ensure_ascii=True),
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    response_mime_type="application/json",
+                    temperature=0.4,
+                ),
+            )
+            if not response.text:
+                raise AgentCallError("Gemini returned an empty response.")
+            return _extract_json(response.text)
+        except Exception as exc:
+            error_str = str(exc)
+            retryable = any(str(code) in error_str for code in RETRY_CODES)
+            if retryable and attempt < MAX_RETRIES:
+                wait = 2 ** attempt  # exponential backoff: 2, 4, 8, 16, 32s
+                print(f"[Retry {attempt}/{MAX_RETRIES}] Transient error, retrying in {wait}s... ({exc})")
+                time.sleep(wait)
+                last_exc = exc
+            else:
+                raise
+
+    raise AgentCallError(f"Failed after {MAX_RETRIES} retries.") from last_exc
 
 
 def classify_domain(input_json: dict[str, Any]) -> dict[str, Any]:

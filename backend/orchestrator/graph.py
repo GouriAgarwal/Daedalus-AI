@@ -30,6 +30,28 @@ def load_fallback_data() -> dict[str, Any]:
         return json.load(file)
 
 
+def first_fallback_sample() -> PipelineState:
+    fallback = load_fallback_data()
+    if isinstance(fallback.get("samples"), list) and fallback["samples"]:
+        sample = fallback["samples"][0]
+    else:
+        sample = fallback
+
+    sample.setdefault(
+        "idea_context",
+        {
+            "domain": sample.get("domain", "Unknown"),
+            "audience": "Not specified in fallback data",
+            "problem": sample.get("idea", ""),
+            "constraints": [],
+            "keywords": [],
+        },
+    )
+    sample.setdefault("round2_critique", {})
+    sample.setdefault("startup_score", {})
+    return sample
+
+
 async def _run_round1(idea: str, idea_context: dict[str, Any]) -> dict[str, Any]:
     pm_input = {"idea": idea, "idea_context": idea_context}
     pm_result = await asyncio.to_thread(agents.run_pm, pm_input)
@@ -145,8 +167,7 @@ async def run_pipeline_async(idea: str, *, use_fallback_on_error: bool = True) -
     except Exception:
         if not use_fallback_on_error:
             raise
-        fallback = load_fallback_data()
-        return fallback["samples"][0]
+        return first_fallback_sample()
 
 
 def run_pipeline(idea: str, *, use_fallback_on_error: bool = True) -> PipelineState:
