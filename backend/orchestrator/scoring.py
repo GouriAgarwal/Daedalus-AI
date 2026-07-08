@@ -25,7 +25,12 @@ def compute_startup_score(final_json: dict[str, Any]) -> dict[str, int]:
     marketing = round1.get("marketing", {})
 
     concerns = critique.get("investor_concerns", []) + critique.get("skeptic_flags", [])
-    penalty = sum(SEVERITY_PENALTIES.get(c.get("severity"), 0.5) for c in concerns)
+    # Handle both formats: flat strings (fallback data) and dicts with severity (live Gemini output)
+    def _concern_penalty(c):
+        if isinstance(c, dict):
+            return SEVERITY_PENALTIES.get(c.get("severity"), 0.5)
+        return 0.5  # flat string — default medium penalty
+    penalty = sum(_concern_penalty(c) for c in concerns)
 
     feasibility = (
         6
