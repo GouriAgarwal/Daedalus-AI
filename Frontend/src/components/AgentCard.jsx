@@ -63,9 +63,10 @@ export default function AgentCard({ agent, data, status = 'idle', index = 0 }) {
 
       {/* Card */}
       <div
-        className="relative h-full glass rounded-2xl p-5 cursor-pointer
+        className={`relative h-full glass rounded-2xl p-5
                    transition-all duration-300 flex flex-col gap-4
-                   hover:translate-y-[-2px]"
+                   hover:translate-y-[-2px]
+                   ${hasData ? 'cursor-pointer' : 'cursor-default'}`}
         style={{
           borderColor: isDone ? agent.colorBorder : 'rgba(255,255,255,0.07)',
           border: `1px solid ${isDone ? agent.colorBorder : 'rgba(255,255,255,0.07)'}`,
@@ -74,9 +75,9 @@ export default function AgentCard({ agent, data, status = 'idle', index = 0 }) {
             : 'inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
         onClick={() => hasData && setExpanded((v) => !v)}
-        role="button"
-        aria-expanded={expanded}
-        tabIndex={0}
+        role={hasData ? 'button' : undefined}
+        aria-expanded={hasData ? expanded : undefined}
+        tabIndex={hasData ? 0 : undefined}
         onKeyDown={(e) => e.key === 'Enter' && hasData && setExpanded((v) => !v)}
       >
         {/* Header row */}
