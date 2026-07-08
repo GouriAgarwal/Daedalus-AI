@@ -1,0 +1,350 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================
+   GLOBAL RESET & BASE STYLES
+   ================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-primary: #050816;
+  --accent: #7C3AED;
+  --accent-light: #9F67FF;
+  --blue: #38BDF8;
+  --pink: #EC4899;
+  --green: #22C55E;
+  --orange: #F59E0B;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ================================================
+   SCROLLBAR
+   ================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.4);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.7);
+}
+
+/* ================================================
+   SELECTION
+   ================================================ */
+::selection {
+  background: rgba(124, 58, 237, 0.4);
+  color: #fff;
+}
+
+/* ================================================
+   GLASS CARD
+   ================================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-hover {
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(124, 58, 237, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ================================================
+   GRADIENT MESH BACKGROUND
+   ================================================ */
+.gradient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #050816;
+}
+
+.gradient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  animation: blobFloat 12s ease-in-out infinite;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+/* ================================================
+   NEON GLOW TEXT
+   ================================================ */
+.glow-text {
+  text-shadow: 0 0 20px rgba(124, 58, 237, 0.5), 0 0 60px rgba(124, 58, 237, 0.2);
+}
+
+.glow-text-blue {
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 0 60px rgba(56, 189, 248, 0.2);
+}
+
+/* ================================================
+   ANIMATED GRADIENT BORDER
+   ================================================ */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #7C3AED, #38BDF8, #EC4899, #7C3AED);
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.gradient-border:hover::before,
+.gradient-border.active::before {
+  opacity: 1;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ================================================
+   SHIMMER SKELETON
+   ================================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ================================================
+   TYPING CURSOR
+   ================================================ */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: var(--accent-light);
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ================================================
+   AGENT STATUS INDICATOR
+   ================================================ */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.idle { background: rgba(255,255,255,0.2); }
+.status-dot.thinking {
+  background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
+  animation: pulse 1s ease-in-out infinite;
+}
+.status-dot.done {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.status-dot.error {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+/* ================================================
+   PROGRESS BAR
+   ================================================ */
+.progress-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--blue), var(--pink));
+  background-size: 200% 100%;
+  animation: progressGlow 2s linear infinite;
+}
+
+@keyframes progressGlow {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ================================================
+   TEXTAREA FOCUS GLOW
+   ================================================ */
+.idea-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(124,58,237,0.5), 0 0 30px rgba(124,58,237,0.15);
+}
+
+/* ================================================
+   BUTTON RIPPLE
+   ================================================ */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform 0.4s ease;
+}
+.btn-ripple:active::after {
+  transform: scale(2);
+  opacity: 0;
+}
+
+/* ================================================
+   GRID LINES BACKGROUND PATTERN
+   ================================================ */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ================================================
+   RADAR CHART CUSTOM
+   ================================================ */
+.recharts-polar-grid-concentric-polygon {
+  stroke: rgba(255,255,255,0.06) !important;
+}
+.recharts-polar-angle-axis-tick-value {
+  fill: rgba(255,255,255,0.5) !important;
+  font-size: 12px !important;
+}
+
+/* ================================================
+   FADE IN ANIMATION
+   ================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* ================================================
+   CHAT BUBBLE TAIL
+   ================================================ */
+.bubble-investor::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-right: 6px solid rgba(239,68,68,0.15);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.bubble-skeptic::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 16px;
+  width: 0;
+  height: 0;
+  border-right: 6px solid rgba(245,158,11,0.15);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+/* ================================================
+   NOISE TEXTURE
+   ================================================ */
+.noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ================================================
+   IFRAME BROWSER MOCKUP
+   ================================================ */
+.browser-bar {
+  height: 36px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+}
+
+.browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* ================================================
+   STAR PARTICLES
+   ================================================ */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}

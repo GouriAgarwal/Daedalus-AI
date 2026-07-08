@@ -1,0 +1,17 @@
+# ── Core API ──────────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# ── LLM — Person A uses Gemini, Person B uses Anthropic for wireframe ─────────
+google-genai>=1.0.0            # Person A: Gemini agents
+anthropic>=0.26.1              # Person B: wireframe_gen Claude fallback
+
+# ── Artifact Generation ───────────────────────────────────────────────────────
+python-pptx==0.6.23
+Pillow==10.3.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv==1.0.1
+aiofiles==23.2.1
+httpx==0.27.0
