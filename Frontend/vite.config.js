@@ -6,9 +6,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Person C's useSSE.js uses API_BASE = 'http://localhost:8000' directly,
-      // so no proxy path rewriting needed — just ensure CORS is open on backend.
-      // These proxy rules allow running frontend on 5173 calling backend on 8000.
+      // Proxy all backend calls so browser avoids CORS issues in dev.
+      // useSSE.js uses API_BASE = 'http://localhost:8000' directly,
+      // but these rules also cover relative-path usage.
       '/build-startup': {
         target: 'http://localhost:8000',
         changeOrigin: true,
