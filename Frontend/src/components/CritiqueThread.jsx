@@ -49,7 +49,7 @@ export default function CritiqueThread({ critique }) {
               key={`inv-${i}`}
               type="investor"
               index={i}
-              text={concern}
+              text={formatCritiqueText(concern)}
             />
           ))}
 
@@ -59,7 +59,7 @@ export default function CritiqueThread({ critique }) {
               key={`sk-${i}`}
               type="skeptic"
               index={investor_concerns.length + i}
-              text={flag}
+              text={formatCritiqueText(flag)}
             />
           ))}
 
@@ -76,6 +76,19 @@ export default function CritiqueThread({ critique }) {
       </div>
     </motion.section>
   )
+}
+
+const formatCritiqueText = (item) => {
+  if (typeof item === 'string') return item
+  if (item?.issue) return item.issue
+  return JSON.stringify(item)
+}
+
+const formatRevisionItem = (item) => {
+  if (typeof item === 'string') return item
+  if (item?.issue) return item.issue
+  if (item?.name) return item.name
+  return JSON.stringify(item)
 }
 
 /* ── Critique bubble ──────────────────────────────────────────────── */
@@ -259,10 +272,14 @@ function RevisionContent({ data, color, showBefore }) {
                 <li key={i} className="text-xs text-white/70 flex items-start gap-2">
                   <span className="mt-1 w-1 h-1 rounded-full flex-shrink-0"
                     style={{ background: color || 'rgba(255,255,255,0.3)' }} />
-                  {item}
+                  {formatRevisionItem(item)}
                 </li>
               ))}
             </ul>
+          ) : typeof value === 'object' ? (
+            <p className={`text-xs leading-relaxed ${showBefore ? 'text-white/40 line-through' : 'text-white/75'}`}>
+              {formatRevisionItem(value)}
+            </p>
           ) : (
             <p className={`text-xs leading-relaxed ${showBefore ? 'text-white/40 line-through' : 'text-white/75'}`}>
               {String(value)}

@@ -189,11 +189,25 @@ function AgentPreview({ data, agentId, color, expanded }) {
     )
   }
 
+  const formatValue = (val) => {
+    if (val == null) return ''
+    if (typeof val === 'string') return val
+    if (Array.isArray(val)) return val.map(formatValue).join(', ')
+    if (typeof val === 'object') {
+      if (val.tagline && val.elevator_pitch) return `${val.tagline} — ${val.elevator_pitch}`
+      if (val.issue) return val.issue
+      if (val.name) return val.name
+      return Object.entries(val).map(([k, v]) => `${k}: ${formatValue(v)}`).join(' · ')
+    }
+    return String(val)
+  }
+
   const renderText = (label, val) => {
     if (!val) return null
-    const displayVal = expanded || String(val).length <= 120
-      ? String(val)
-      : String(val).slice(0, 120) + '…'
+    const text = formatValue(val)
+    const displayVal = expanded || text.length <= 120
+      ? text
+      : text.slice(0, 120) + '…'
     return (
       <div>
         <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">{label}</div>
@@ -204,32 +218,35 @@ function AgentPreview({ data, agentId, color, expanded }) {
 
   // PM agent
   if (agentId === 'pm') {
+    const features = data.core_features || data.mvp_features
+    const roadmap = data.roadmap || data.user_journey
+    const mvpScope = data.mvp_scope || data.go_to_market || (data.timeline_months ? `${data.timeline_months}-month timeline` : null)
     return (
       <div className="space-y-3">
         {renderText('Problem', data.problem)}
         {renderText('Solution', data.solution)}
-        {!expanded && data.core_features && (
+        {!expanded && features && (
           <div>
             <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Core Features</div>
-            {renderList(data.core_features)}
+            {renderList(features)}
           </div>
         )}
         {expanded && (
           <>
             {renderText('Target Users', data.target_users)}
-            {data.core_features && (
+            {features && (
               <div>
                 <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Core Features</div>
-                {renderList(data.core_features)}
+                {renderList(features)}
               </div>
             )}
-            {data.roadmap && (
+            {roadmap && (
               <div>
                 <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Roadmap</div>
-                {renderList(data.roadmap)}
+                {renderList(roadmap)}
               </div>
             )}
-            {renderText('MVP Scope', data.mvp_scope)}
+            {renderText('MVP Scope', mvpScope)}
           </>
         )}
       </div>
@@ -238,6 +255,8 @@ function AgentPreview({ data, agentId, color, expanded }) {
 
   // UI agent
   if (agentId === 'ui') {
+    // screens can be strings OR objects { name, components }
+    const screenLabel = (s) => typeof s === 'string' ? s : (s?.name ?? JSON.stringify(s))
     return (
       <div className="space-y-3">
         {data.screens && (
@@ -247,51 +266,88 @@ function AgentPreview({ data, agentId, color, expanded }) {
               {(expanded ? data.screens : data.screens.slice(0, 4)).map((s, i) => (
                 <span key={i} className="px-2 py-0.5 rounded-full text-[10px] border"
                   style={{ borderColor: `${color}44`, color: color, background: `${color}10` }}>
-                  {s}
+                  {screenLabel(s)}
                 </span>
               ))}
               {!expanded && data.screens.length > 4 && (
                 <span className="text-xs text-white/30">+{data.screens.length - 4}</span>
               )}
             </div>
+            {/* Show components list for each screen when expanded */}
+            {expanded && data.screens.map((s, i) => {
+              const components = s?.components || s?.key_components
+              return components ? (
+                <div key={i} className="mt-2">
+                  <div className="text-white/30 text-[10px] mb-1">{screenLabel(s)}</div>
+                  {renderList(components)}
+                </div>
+              ) : null
+            })}
           </div>
         )}
-        {expanded && data.key_interactions && (
+        {(data.key_user_flows || data.wireframe_notes) && (
+          <div>
+            <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">User Flows</div>
+            {renderList(data.key_user_flows || data.wireframe_notes)}
+          </div>
+        )}
+        {expanded && (data.key_interactions || data.information_architecture) && (
           <div>
             <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Key Interactions</div>
-            {renderList(data.key_interactions)}
+            {renderList(data.key_interactions || data.information_architecture)}
           </div>
         )}
-        {expanded && data.component_library && renderText('Component Library', data.component_library)}
+        {expanded && (data.component_library || data.visual_style) &&
+          renderText('Component Library', data.component_library || data.visual_style)}
       </div>
     )
   }
 
   // Backend agent
   if (agentId === 'backend') {
+    // api_endpoints can be strings OR objects { method, path, purpose } from Gemini
+    const epLabel = (ep) => {
+      if (typeof ep === 'string') return ep
+      if (ep?.method && ep?.path) return `${ep.method} ${ep.path}`
+      return JSON.stringify(ep)
+    }
+    // key_endpoints from fallback_data is an array of strings
+    const endpoints = data.api_endpoints || data.key_endpoints || []
+    // tech_choices can be a dict or array
+    const techItems = Array.isArray(data.tech_stack)
+      ? data.tech_stack
+      : data.tech_choices
+        ? Object.entries(data.tech_choices).map(([k, v]) => `${k}: ${v}`)
+        : []
     return (
       <div className="space-y-3">
         {renderText('Architecture', data.architecture)}
-        {data.api_endpoints && (
+        {endpoints.length > 0 && (
           <div>
             <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">API Endpoints</div>
             <div className="space-y-1">
-              {(expanded ? data.api_endpoints : data.api_endpoints.slice(0, 3)).map((ep, i) => (
+              {(expanded ? endpoints : endpoints.slice(0, 3)).map((ep, i) => (
                 <div key={i} className="font-mono text-[10px] text-white/60 bg-white/[0.04] px-2 py-1 rounded-md">
-                  {ep}
+                  {epLabel(ep)}
                 </div>
               ))}
-              {!expanded && data.api_endpoints.length > 3 && (
-                <div className="font-mono text-[10px] text-white/30 px-2">+{data.api_endpoints.length - 3} more</div>
+              {!expanded && endpoints.length > 3 && (
+                <div className="font-mono text-[10px] text-white/30 px-2">+{endpoints.length - 3} more</div>
               )}
             </div>
           </div>
         )}
-        {expanded && data.tech_stack && (
+        {data.services && (
+          <div>
+            <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Services</div>
+            {renderList(data.services)}
+          </div>
+        )}
+        {expanded && techItems.length > 0 && (
           <div>
             <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Tech Stack</div>
             <div className="flex flex-wrap gap-1.5">
-              {data.tech_stack.map((t, i) => (
+              {techItems.map((t, i) => (
                 <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-white/[0.06] text-white/60">{t}</span>
               ))}
             </div>
@@ -303,10 +359,12 @@ function AgentPreview({ data, agentId, color, expanded }) {
 
   // Marketing agent
   if (agentId === 'marketing') {
+    const gtm = data.gtm_strategy || data.positioning
+    const positioning = data.competitive_positioning || data.value_props || data.competitors
     return (
       <div className="space-y-3">
-        {renderText('GTM Strategy', data.gtm_strategy)}
-        {!expanded && renderText('Positioning', data.competitive_positioning)}
+        {renderText('GTM Strategy', gtm)}
+        {!expanded && renderText('Positioning', positioning)}
         {expanded && (
           <>
             {data.channels && (
@@ -336,9 +394,10 @@ function AgentPreview({ data, agentId, color, expanded }) {
     )
   }
 
-  // Investor agent — receives { concerns: string[] }
+  // Investor agent — concerns can be strings OR objects { severity, issue, agent, recommended_revision }
   if (agentId === 'investor') {
     const items = data.concerns || []
+    const concernText = (c) => typeof c === 'string' ? c : (c?.issue ?? JSON.stringify(c))
     return (
       <div className="space-y-3">
         <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Due-Diligence Concerns</div>
@@ -350,7 +409,7 @@ function AgentPreview({ data, agentId, color, expanded }) {
               <li key={i} className="flex items-start gap-2 text-xs text-white/75 leading-relaxed
                                     bg-red-500/5 border border-red-500/10 rounded-lg px-3 py-2">
                 <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 bg-red-400" />
-                {item}
+                <span>{concernText(item)}</span>
               </li>
             ))}
             {!expanded && items.length > 2 && (
@@ -362,9 +421,10 @@ function AgentPreview({ data, agentId, color, expanded }) {
     )
   }
 
-  // Skeptic agent — receives { flags: string[] }
+  // Skeptic agent — flags can be strings OR objects { severity, issue }
   if (agentId === 'skeptic') {
     const items = data.flags || []
+    const flagText = (f) => typeof f === 'string' ? f : (f?.issue ?? JSON.stringify(f))
     return (
       <div className="space-y-3">
         <div className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Red Flags</div>
@@ -376,7 +436,7 @@ function AgentPreview({ data, agentId, color, expanded }) {
               <li key={i} className="flex items-start gap-2 text-xs text-white/75 leading-relaxed
                                     bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
                 <span className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 bg-amber-400" />
-                {item}
+                <span>{flagText(item)}</span>
               </li>
             ))}
             {!expanded && items.length > 2 && (
