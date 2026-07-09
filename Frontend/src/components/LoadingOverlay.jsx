@@ -21,12 +21,13 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center"
-          style={{ background: 'rgba(5,8,22,0.85)', backdropFilter: 'blur(16px)' }}
+          className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
+          style={{ background: 'rgba(5,8,22,0.82)', backdropFilter: 'blur(14px)' }}
           aria-live="polite"
           aria-label="AI agents processing"
         >
-          <div className="flex flex-col items-center gap-8 px-6 max-w-sm w-full">
+          {/* pointer-events-auto on inner card so only the card is interactive */}
+          <div className="pointer-events-auto flex flex-col items-center gap-8 px-6 max-w-sm w-full">
             {/* Logo spinner */}
             <div className="relative">
               <motion.div
@@ -38,7 +39,11 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
                 ⚡
               </motion.div>
               {/* Ring */}
-              <svg className="absolute -inset-3 w-[88px] h-[88px] -rotate-90" viewBox="0 0 88 88">
+              <svg
+                className="absolute top-1/2 left-1/2 -rotate-90"
+                style={{ width: 88, height: 88, transform: 'translate(-50%, -50%) rotate(-90deg)', position: 'absolute', top: '50%', left: '50%' }}
+                viewBox="0 0 88 88"
+              >
                 <circle cx="44" cy="44" r="40"
                   fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3"
                 />
@@ -112,6 +117,11 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
                 )
               })}
             </div>
+
+            {/* Stop hint */}
+            <p className="text-white/20 text-xs text-center">
+              Press <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[10px]">Stop</kbd> in the input box to cancel
+            </p>
           </div>
         </motion.div>
       )}
