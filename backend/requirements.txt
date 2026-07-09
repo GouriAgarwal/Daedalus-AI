@@ -4,8 +4,8 @@ uvicorn[standard]==0.29.0
 python-multipart==0.0.9
 
 # ── LLM / Orchestration ───────────────────────────────────────────────────────
-anthropic==0.26.1          # Claude API (wireframe_gen + shared with Person A)
-langchain-core==0.2.5      # shared types with Person A's LangGraph pipeline
+google-genai>=1.0.0        # Person A: Gemini agents (domain classifier, PM, UI, backend, marketing, investor, skeptic)
+anthropic>=0.26.1          # Person B: wireframe_gen HTML generation via Claude
 
 # ── Artifact Generation ───────────────────────────────────────────────────────
 python-pptx==0.6.23        # pitch deck slides
