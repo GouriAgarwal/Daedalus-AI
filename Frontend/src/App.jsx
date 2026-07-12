@@ -189,6 +189,8 @@ export default function App() {
               <Section id="wireframe">
                 <WireframePreview
                   sessionId={sessionId}
+                  uiSpec={data?.round1?.ui}
+                  idea={data?.idea}
                   visible={isDone}
                 />
               </Section>

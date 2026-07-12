@@ -79,8 +79,22 @@ export default function ExportButtons({ sessionId, visible }) {
         const href = URL.createObjectURL(blob)
         triggerDownload(href, `ai-cofounder-${card.endpoint}${card.ext}`)
         URL.revokeObjectURL(href)
+
+        setDownloadStates((s) => ({ ...s, [card.id]: 'done' }))
+        toast.success(`${card.title} ready!`, {
+          style: {
+            background: 'rgba(5,8,22,0.95)',
+            border: `1px solid ${card.colorBorder}`,
+            color: '#fff',
+            fontSize: '13px',
+            borderRadius: '12px',
+          },
+          iconTheme: { primary: card.color, secondary: '#fff' },
+        })
+        // Reset after 3 seconds
+        setTimeout(() => setDownloadStates((s) => ({ ...s, [card.id]: null })), 3000)
       } else {
-        // ── Demo / no-backend mode ─────────────────────────────────────
+        // ── Demo / no-backend mode ────────────────────────────────────────────────────
         await new Promise((r) => setTimeout(r, 1400))
         toast('Demo mode — connect your backend to download real files', {
           icon: '📦',
@@ -92,22 +106,9 @@ export default function ExportButtons({ sessionId, visible }) {
             borderRadius: '12px',
           },
         })
+        // Reset (not 'done') since no real file was downloaded
+        setDownloadStates((s) => ({ ...s, [card.id]: null }))
       }
-
-      setDownloadStates((s) => ({ ...s, [card.id]: 'done' }))
-      toast.success(`${card.title} ready!`, {
-        style: {
-          background: 'rgba(5,8,22,0.95)',
-          border: `1px solid ${card.colorBorder}`,
-          color: '#fff',
-          fontSize: '13px',
-          borderRadius: '12px',
-        },
-        iconTheme: { primary: card.color, secondary: '#fff' },
-      })
-
-      // Reset after 3 seconds
-      setTimeout(() => setDownloadStates((s) => ({ ...s, [card.id]: null })), 3000)
     } catch (err) {
       setDownloadStates((s) => ({ ...s, [card.id]: null }))
       toast.error(`Failed to download ${card.title}: ${err.message}`, {

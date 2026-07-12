@@ -59,8 +59,21 @@ def generate_code_skeleton(
         def add(filename: str, content: str) -> None:
             zf.writestr(f"{project_name}/{filename}", dedent(content).lstrip("\n"))
 
-        schema   = backend_spec.get("database_schema", {})
-        endpoints = backend_spec.get("key_endpoints", [])
+        # Handle both live Gemini format (entities list) and fallback format (database_schema dict)
+        entities = backend_spec.get("entities", [])
+        schema_raw = backend_spec.get("database_schema", {})
+        if entities:
+            schema = {e["name"]: e.get("fields", []) for e in entities if isinstance(e, dict)}
+        else:
+            schema = schema_raw
+
+        # Handle both live Gemini format (api_endpoints list-of-dicts) and fallback (key_endpoints list-of-strings)
+        raw_endpoints = backend_spec.get("api_endpoints") or backend_spec.get("key_endpoints", [])
+        endpoints = [
+            f"{ep['method']} {ep['path']}" if isinstance(ep, dict) else ep
+            for ep in raw_endpoints
+        ]
+
         tech      = backend_spec.get("tech_choices", {})
         services  = backend_spec.get("services", [])
         arch      = backend_spec.get("architecture", "FastAPI + PostgreSQL")

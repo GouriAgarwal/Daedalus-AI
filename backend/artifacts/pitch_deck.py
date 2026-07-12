@@ -94,7 +94,9 @@ def generate_pitch_deck(pipeline_result: dict[str, Any]) -> bytes:
         prs,
         title="Who We Serve",
         left_header="Target User",
-        left_body=pm.get("target_user", ""),
+        left_body=(
+            lambda t: "\n".join(t) if isinstance(t, list) else (t or "")
+        )(pm.get("target_users") or pm.get("target_user", "")),
         right_header="ICP (Marketing)",
         right_body=mktg.get("icp", ""),
     )
@@ -192,7 +194,6 @@ def _blank_slide(prs: Presentation) -> Any:
 def _fill_bg(slide: Any, color: RGBColor) -> None:
     """Fill the slide background with a solid colour."""
     from pptx.oxml.ns import qn
-    from lxml import etree
 
     bg = slide.background
     fill = bg.fill
