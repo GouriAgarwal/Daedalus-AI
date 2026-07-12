@@ -109,75 +109,8 @@ export const SCORE_METRICS = [
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 /**
- * Fallback demo data used when the API is unavailable.
+ * FALLBACK_DATA — kept as empty neutral base.
+ * tailorFallback.js builds all demo content from scratch based on the idea,
+ * so this is no longer used directly. Exported for backwards compatibility.
  */
-export const FALLBACK_DATA = {
-  domain: 'HRMS',
-  round1: {
-    pm: {
-      problem: 'Remote-first companies struggle with fragmented HR tools — payroll, attendance, and performance reviews live in silos.',
-      solution: 'A unified HRMS platform with AI-powered insights, automated compliance, and seamless integrations.',
-      target_users: 'SMBs with 50–500 employees operating remotely or in hybrid mode.',
-      core_features: [
-        'Smart onboarding workflows',
-        'Real-time attendance & leave management',
-        'AI performance review assistant',
-        'Payroll automation with compliance checks',
-        'Employee sentiment analytics',
-      ],
-      mvp_scope: 'Onboarding + Attendance + Payroll for a 3-month MVP',
-      roadmap: ['M1: Core HRMS', 'M2: AI Assistant', 'M3: Analytics', 'M4: Marketplace integrations'],
-    },
-    ui: {
-      design_system: { primary: '#7C3AED', font: 'Inter', theme: 'Dark with Light mode toggle' },
-      screens: ['Login / SSO', 'Dashboard Overview', 'Employee Directory', 'Leave Calendar', 'Payroll Breakdown', 'Performance Review'],
-      key_interactions: ['Drag-and-drop org chart', 'Inline editing in employee profiles', 'One-click payroll run'],
-      component_library: 'Radix UI + Custom Tailwind',
-    },
-    backend: {
-      architecture: 'Microservices on AWS — API Gateway → Lambda → RDS (PostgreSQL)',
-      api_endpoints: [
-        'POST /auth/sso',
-        'GET /employees',
-        'POST /payroll/run',
-        'GET /attendance/:id',
-        'POST /reviews/submit',
-      ],
-      database_schema: { employees: ['id', 'name', 'role', 'department', 'salary'], leaves: ['id', 'employee_id', 'type', 'status', 'dates'] },
-      tech_stack: ['FastAPI', 'PostgreSQL', 'Redis', 'Celery', 'S3'],
-    },
-    marketing: {
-      gtm_strategy: 'Product-led growth: free tier up to 20 employees, then $8/seat/month.',
-      channels: ['LinkedIn outreach to HR managers', 'SEO for "HRMS for remote teams"', 'Integrations with Slack & Notion'],
-      competitive_positioning: 'Faster to deploy than Workday, smarter than BambooHR.',
-      target_cac: '$120',
-      target_ltv: '$1,800',
-      messaging: 'The only HRMS that grows with your remote team.',
-    },
-  },
-  round2_critique: {
-    investor_concerns: [
-      "HRMS is a crowded space \u2014 Workday, BambooHR, Rippling dominate. What's the unfair advantage?",
-      'CAC of $120 seems optimistic for B2B SaaS targeting HR managers.',
-    ],
-    skeptic_flags: [
-      'AI performance reviews risk regulatory pushback in the EU under GDPR.',
-      'Payroll compliance across 50 states is a multi-year engineering problem, not a 3-month MVP.',
-    ],
-    revisions: {
-      pm: {
-        revised_mvp_scope: 'Cut payroll from MVP. Focus on onboarding + attendance + Slack integration.',
-        differentiation: 'Target YC-backed startups exclusively — they have budget, no legacy HR system, and need speed.',
-        updated_roadmap: ['M1: Onboarding + Attendance', 'M2: Performance OKRs', 'M3: Payroll lite', 'M4: Full payroll'],
-      },
-    },
-  },
-  startup_score: {
-    feasibility: 7,
-    market_size: 9,
-    differentiation: 5,
-    team_fit: 8,
-    innovation: 6,
-    execution: 7,
-  },
-}
+export const FALLBACK_DATA = {}

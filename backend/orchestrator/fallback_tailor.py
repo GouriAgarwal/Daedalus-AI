@@ -113,46 +113,90 @@ def tailor_fallback_for_idea(idea: str, base: dict[str, Any] | None = None) -> d
     )
 
     ui = round1.setdefault("ui", {})
+
+    _domain_colors = {
+        "HRMS":       {"primary_color": "#6366F1", "accent_color": "#10B981"},
+        "Healthcare": {"primary_color": "#06B6D4", "accent_color": "#10B981"},
+        "E-commerce": {"primary_color": "#EC4899", "accent_color": "#F59E0B"},
+        "EdTech":     {"primary_color": "#8B5CF6", "accent_color": "#10B981"},
+        "FinTech":    {"primary_color": "#3B82F6", "accent_color": "#F59E0B"},
+        "Mobility":   {"primary_color": "#14B8A6", "accent_color": "#F97316"},
+        "FoodTech":   {"primary_color": "#F97316", "accent_color": "#EF4444"},
+        "Climate":    {"primary_color": "#22C55E", "accent_color": "#84CC16"},
+    }
+    _colors = _domain_colors.get(domain, {"primary_color": "#7C3AED", "accent_color": "#10B981"})
+
     ui["design_system"] = ui.get("design_system") or {
-        "primary_color": "#6366F1",
-        "accent_color": "#10B981",
+        **_colors,
         "font": "Inter",
         "style": "Clean SaaS with dark mode support",
     }
-    ui["screens"] = [
-        {
-            "name": "Dashboard",
-            "components": [
-                f"KPI cards for {domain}",
-                f"Recent activity for {label}",
-                "Quick-action panel",
-            ],
-        },
-        {
-            "name": f"{domain} Workspace",
-            "components": [
-                "Search + filter bar",
-                f"Primary data table for {label}",
-                "Detail side panel",
-            ],
-        },
-        {
-            "name": "Workflow",
-            "components": [
-                f"Step-by-step flow for {domain.lower()} tasks",
-                "Status tracker",
-                "Confirmation modal",
-            ],
-        },
-        {
-            "name": "Settings",
-            "components": [
-                "Profile settings",
-                "Team permissions",
-                "Integration toggles",
-            ],
-        },
-    ]
+
+    _domain_screens = {
+        "Healthcare": [
+            {"name": "Dashboard",       "components": [f"KPI cards for {domain}", "Appointment status chart", "Patient queue panel"]},
+            {"name": "Appointments",    "components": ["Calendar view", "Search + filter bar", "Booking confirmation modal"]},
+            {"name": "Patient Records", "components": [f"Primary data table for {label}", "Detail side panel", "Medical history list"]},
+            {"name": "Video Consult",   "components": ["Video call panel", "Chat sidebar", "Prescription panel"]},
+            {"name": "Settings",        "components": ["Profile settings", "Clinic permissions", "Integration toggles"]},
+        ],
+        "E-commerce": [
+            {"name": "Dashboard", "components": [f"KPI cards for {domain}", "Revenue analytics chart", "Recent orders table"]},
+            {"name": "Products",  "components": ["Search + filter bar", f"Primary data table for {label}", "Product detail panel"]},
+            {"name": "Orders",    "components": ["Order list table", "Status filter bar", "Order detail modal"]},
+            {"name": "Customers", "components": [f"KPI cards for {domain}", "Customer directory table", "Analytics chart"]},
+            {"name": "Settings",  "components": ["Store settings", "Payment integrations", "Shipping rules panel"]},
+        ],
+        "EdTech": [
+            {"name": "Dashboard", "components": [f"KPI cards for {domain}", "Progress analytics chart", "Upcoming lessons list"]},
+            {"name": "Courses",   "components": ["Search + filter bar", f"Primary data table for {label}", "Course detail panel"]},
+            {"name": "Students",  "components": ["Student directory table", "Analytics chart", "Detail side panel"]},
+            {"name": "Lessons",   "components": ["Calendar view", "Lesson content panel", "Quiz modal"]},
+            {"name": "Settings",  "components": ["Profile settings", "Certification panel", "Integration toggles"]},
+        ],
+        "FinTech": [
+            {"name": "Dashboard",    "components": [f"KPI cards for {domain}", "Portfolio analytics chart", "Recent transactions table"]},
+            {"name": "Portfolio",    "components": ["Search + filter bar", f"Primary data table for {label}", "Asset detail panel"]},
+            {"name": "Transactions", "components": ["Transaction list table", "Search + filter bar", "Transaction detail modal"]},
+            {"name": "Analytics",    "components": ["Analytics chart", "Performance metrics table", "Export panel"]},
+            {"name": "Settings",     "components": ["Account settings", "Security panel", "Linked accounts panel"]},
+        ],
+        "HRMS": [
+            {"name": "Dashboard",           "components": [f"KPI cards for {domain}", "Attrition risk chart", "Pending approvals table"]},
+            {"name": "Employee Directory",  "components": ["Search + filter bar", f"Primary data table for {label}", "Detail side panel"]},
+            {"name": "Leave Management",    "components": ["Calendar view", "Pending approvals list", "Policy configuration panel"]},
+            {"name": "Payroll",             "components": ["Monthly payroll table", "Analytics chart", "Tax breakdown modal"]},
+            {"name": "Settings",            "components": ["Profile settings", "Team permissions", "Integration toggles"]},
+        ],
+        "Mobility": [
+            {"name": "Dashboard", "components": [f"KPI cards for {domain}", "Fleet map panel", "Active routes table"]},
+            {"name": "Fleet",     "components": ["Search + filter bar", f"Primary data table for {label}", "Vehicle detail panel"]},
+            {"name": "Routes",    "components": ["Route list table", "Calendar view", "Route detail modal"]},
+            {"name": "Analytics", "components": ["Analytics chart", "Fuel & performance table", "Export panel"]},
+            {"name": "Settings",  "components": ["Account settings", "Driver permissions", "Integration toggles"]},
+        ],
+        "FoodTech": [
+            {"name": "Dashboard", "components": [f"KPI cards for {domain}", "Orders analytics chart", "Live orders table"]},
+            {"name": "Menu",      "components": ["Search + filter bar", f"Primary data table for {label}", "Item detail panel"]},
+            {"name": "Orders",    "components": ["Order list table", "Status filter bar", "Order detail modal"]},
+            {"name": "Kitchen",   "components": ["Live order queue panel", "Status tracker", "Confirmation modal"]},
+            {"name": "Settings",  "components": ["Restaurant settings", "Delivery integrations", "Tax panel"]},
+        ],
+        "Climate": [
+            {"name": "Dashboard", "components": [f"KPI cards for {domain}", "Emissions analytics chart", "Recent transactions table"]},
+            {"name": "Projects",  "components": ["Search + filter bar", f"Primary data table for {label}", "Project detail panel"]},
+            {"name": "Credits",   "components": ["Credit portfolio table", "Analytics chart", "Transaction modal"]},
+            {"name": "Reports",   "components": ["Analytics chart", "Compliance metrics table", "Export panel"]},
+            {"name": "Settings",  "components": ["Account settings", "Partner integrations", "Audit panel"]},
+        ],
+    }
+    ui["screens"] = _domain_screens.get(domain, [
+        {"name": "Dashboard",          "components": [f"KPI cards for {domain}", f"Recent activity for {label}", "Quick-action panel"]},
+        {"name": f"{domain} Workspace","components": ["Search + filter bar", f"Primary data table for {label}", "Detail side panel"]},
+        {"name": "Workflow",           "components": [f"Step-by-step flow for {domain.lower()} tasks", "Status tracker", "Confirmation modal"]},
+        {"name": "Analytics",          "components": ["Analytics chart", "Performance metrics table", "Export panel"]},
+        {"name": "Settings",           "components": ["Profile settings", "Team permissions", "Integration toggles"]},
+    ])
     ui["key_user_flows"] = [
         f"User signs up → completes onboarding for {label}",
         f"User performs the core {domain.lower()} action → sees result on dashboard",
