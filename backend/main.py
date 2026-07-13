@@ -86,8 +86,12 @@ def _sse_done() -> str:
 # Mock stream — mirrors FALLBACK_DATA shape with realistic delays
 # ─────────────────────────────────────────────────────────────────────────────
 async def _mock_stream(idea: str, session_id: str) -> AsyncGenerator[str, None]:
-    data = dict(FALLBACK_DATA)
-    data["idea"] = idea
+    try:
+        from orchestrator.graph import generate_dynamic_fallback
+        data = generate_dynamic_fallback(idea)
+    except Exception:
+        data = dict(FALLBACK_DATA)
+        data["idea"] = idea
 
     # Round 1 — agents stream one by one
     for agent_key in ["pm", "ui", "backend", "marketing"]:
