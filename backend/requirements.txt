@@ -9,7 +9,7 @@ anthropic>=0.26.1          # Person B: wireframe_gen HTML generation via Claude
 
 # ── Artifact Generation ───────────────────────────────────────────────────────
 python-pptx==0.6.23        # pitch deck slides
-Pillow==10.3.0             # image handling for pptx thumbnails
+Pillow>=10.4.0             # image handling for pptx thumbnails (10.3.0 incompatible with Python 3.14)
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
 python-dotenv==1.0.1       # .env loading

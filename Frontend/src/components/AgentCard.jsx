@@ -451,8 +451,10 @@ function AgentPreview({ data, agentId, color, expanded }) {
   // Generic fallback
   return (
     <div className="space-y-2">
-      {Object.entries(data).slice(0, expanded ? 10 : 3).map(([k, v]) => (
-        k !== '_streaming' && k !== '_type' && (
+      {Object.entries(data)
+        .filter(([k]) => k !== '_streaming' && k !== '_type')
+        .slice(0, expanded ? 10 : 3)
+        .map(([k, v]) => (
           <div key={k}>
             <div className="text-white/40 text-[10px] uppercase tracking-widest mb-0.5">
               {k.replace(/_/g, ' ')}
@@ -461,8 +463,7 @@ function AgentPreview({ data, agentId, color, expanded }) {
               {Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)}
             </p>
           </div>
-        )
-      ))}
+        ))}
     </div>
   )
 }

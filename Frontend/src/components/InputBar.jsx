@@ -5,8 +5,40 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ArrowRight, Lightbulb, Command } from 'lucide-react'
-import { TypeAnimation } from 'react-type-animation'
 import { EXAMPLE_IDEAS } from '../utils/constants'
+
+/** Simple typing animation — cycles through placeholder strings */
+function TypingPlaceholder({ texts }) {
+  const [displayed, setDisplayed] = useState('')
+  const [textIdx, setTextIdx]   = useState(0)
+  const [charIdx, setCharIdx]   = useState(0)
+  const [deleting, setDeleting] = useState(false)
+  useEffect(() => {
+    const current = texts[textIdx % texts.length]
+    const speed   = deleting ? 30 : 55
+    const timer = setTimeout(() => {
+      if (!deleting) {
+        setDisplayed(current.slice(0, charIdx + 1))
+        if (charIdx + 1 === current.length) {
+          setTimeout(() => setDeleting(true), 2000)
+        } else {
+          setCharIdx(c => c + 1)
+        }
+      } else {
+        setDisplayed(current.slice(0, charIdx - 1))
+        if (charIdx - 1 === 0) {
+          setDeleting(false)
+          setTextIdx(i => i + 1)
+          setCharIdx(0)
+        } else {
+          setCharIdx(c => c - 1)
+        }
+      }
+    }, speed)
+    return () => clearTimeout(timer)
+  }, [charIdx, deleting, textIdx, texts])
+  return <span>{displayed}<span className="animate-pulse">|</span></span>
+}
 
 const PLACEHOLDERS = [
   'AI-powered hiring platform for Web3 companies...',
@@ -32,12 +64,13 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
   useEffect(() => {
     const handler = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        if (idea.trim() && !isLoading) handleSubmit()
+        const trimmed = idea.trim()
+        if (trimmed && !isLoading) onSubmit(trimmed)
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [idea, isLoading])
+  }, [idea, isLoading, onSubmit])
 
   const handleSubmit = () => {
     const trimmed = idea.trim()
@@ -116,13 +149,7 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
           {/* Typing animation placeholder */}
           {!idea && !focused && (
             <div className="absolute top-5 left-5 pointer-events-none text-white/30 text-base font-normal">
-              <TypeAnimation
-                sequence={PLACEHOLDERS.flatMap((p) => [p, 2200])}
-                wrapper="span"
-                speed={60}
-                deletionSpeed={80}
-                repeat={Infinity}
-              />
+              <TypingPlaceholder texts={PLACEHOLDERS} />
             </div>
           )}
 

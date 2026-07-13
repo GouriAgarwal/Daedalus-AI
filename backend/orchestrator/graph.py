@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import copy
-import json
-from pathlib import Path
 from typing import Any, TypedDict
 
 from . import agents, critique, scoring
@@ -21,53 +19,39 @@ class PipelineState(TypedDict, total=False):
     startup_score: dict[str, int]
 
 
-def _fallback_path() -> Path:
-    return Path(__file__).with_name("fallback_data.json")
+from .fallback_tailor import tailor_fallback_for_idea
+from .normalize import normalize_pipeline_output
 
 
-def load_fallback_data() -> dict[str, Any]:
-    with _fallback_path().open("r", encoding="utf-8") as file:
-        return json.load(file)
+def first_fallback_sample(idea: str = "") -> PipelineState:
+    return normalize_pipeline_output(tailor_fallback_for_idea(idea))
 
 
-def first_fallback_sample() -> PipelineState:
-    fallback = load_fallback_data()
-    if isinstance(fallback.get("samples"), list) and fallback["samples"]:
-        sample = fallback["samples"][0]
-    else:
-        sample = fallback
-
-    sample.setdefault(
-        "idea_context",
-        {
-            "domain": sample.get("domain", "Unknown"),
-            "audience": "Not specified in fallback data",
-            "problem": sample.get("idea", ""),
-            "constraints": [],
-            "keywords": [],
-        },
-    )
-    sample.setdefault("round2_critique", {})
-    sample.setdefault("startup_score", {})
-    return sample
+async def _run_agent_safe(agent_fn, fallback_data: dict[str, Any], agent_key: str, *args):
+    """Run a single agent; on failure return tailored fallback for that agent only."""
+    try:
+        return await asyncio.to_thread(agent_fn, *args)
+    except Exception as exc:
+        print(f"[round1] {agent_key} agent failed: {type(exc).__name__}: {exc}")
+        return fallback_data.get(agent_key, {})
 
 
 async def _run_round1(idea: str, idea_context: dict[str, Any]) -> dict[str, Any]:
+    fallback = tailor_fallback_for_idea(idea)
+    fb_round1 = fallback.get("round1", {})
+
     pm_input = {"idea": idea, "idea_context": idea_context}
-    pm_result = await asyncio.to_thread(agents.run_pm, pm_input)
+    pm_result = await _run_agent_safe(agents.run_pm, fb_round1, "pm", pm_input)
 
     shared_input = {
         "idea": idea,
         "idea_context": idea_context,
         "pm": pm_result,
     }
-    ui_task = asyncio.to_thread(agents.run_ui, shared_input)
-    backend_task = asyncio.to_thread(agents.run_backend, shared_input)
-    marketing_task = asyncio.to_thread(agents.run_marketing, shared_input)
     ui_result, backend_result, marketing_result = await asyncio.gather(
-        ui_task,
-        backend_task,
-        marketing_task,
+        _run_agent_safe(agents.run_ui, fb_round1, "ui", shared_input),
+        _run_agent_safe(agents.run_backend, fb_round1, "backend", shared_input),
+        _run_agent_safe(agents.run_marketing, fb_round1, "marketing", shared_input),
     )
 
     return {
@@ -102,7 +86,7 @@ async def _pipeline_direct(idea: str) -> PipelineState:
         "round2_critique": round2,
     }
     output["startup_score"] = scoring.compute_startup_score(output)
-    return output
+    return normalize_pipeline_output(output)
 
 
 def _classify_node(state: PipelineState) -> PipelineState:
@@ -165,10 +149,10 @@ async def run_pipeline_async(idea: str, *, use_fallback_on_error: bool = True) -
     try:
         return await _pipeline_direct(idea.strip())
     except Exception as exc:
-        print(f"[run_pipeline_async] Live pipeline failed: {exc}, using dynamic fallback")
+        print(f"[run_pipeline_async] Pipeline failed: {type(exc).__name__}: {exc}")
         if not use_fallback_on_error:
             raise
-        return generate_dynamic_fallback(idea.strip())
+        return first_fallback_sample(idea)
 
 
 def run_pipeline(idea: str, *, use_fallback_on_error: bool = True) -> PipelineState:

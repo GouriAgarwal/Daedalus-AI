@@ -42,9 +42,16 @@ except ImportError:
     ORCHESTRATOR_AVAILABLE = False
 
 # ── Fallback data ────────────────────────────────────────────────────────────
+from orchestrator.fallback_tailor import tailor_fallback_for_idea
+from orchestrator.normalize import normalize_pipeline_output
+
 _FALLBACK_PATH = Path(__file__).parent / "orchestrator" / "fallback_data.json"
-with open(_FALLBACK_PATH) as f:
-    FALLBACK_DATA: dict = json.load(f)
+try:
+    with open(_FALLBACK_PATH) as f:
+        FALLBACK_DATA: dict = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError) as _e:
+    print(f"[WARN] Could not load fallback_data.json: {_e}")
+    FALLBACK_DATA = {}
 
 # ── Session store ────────────────────────────────────────────────────────────
 sessions: dict[str, dict] = {}
@@ -58,9 +65,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
+CORS_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://localhost:5174"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,12 +98,7 @@ def _sse_done() -> str:
 # Mock stream — mirrors FALLBACK_DATA shape with realistic delays
 # ─────────────────────────────────────────────────────────────────────────────
 async def _mock_stream(idea: str, session_id: str) -> AsyncGenerator[str, None]:
-    try:
-        from orchestrator.graph import generate_dynamic_fallback
-        data = generate_dynamic_fallback(idea)
-    except Exception:
-        data = dict(FALLBACK_DATA)
-        data["idea"] = idea
+    data = normalize_pipeline_output(tailor_fallback_for_idea(idea))
 
     # Round 1 — agents stream one by one
     for agent_key in ["pm", "ui", "backend", "marketing"]:
@@ -139,6 +146,8 @@ async def _live_stream(idea: str, session_id: str) -> AsyncGenerator[str, None]:
 
         # Run the full pipeline (Person A handles Claude calls internally)
         result = await run_pipeline_async(idea, use_fallback_on_error=True)
+        result = normalize_pipeline_output(result)
+        result["idea"] = result.get("idea") or idea.strip()
 
         # Stream round1 agents one by one for progressive UI reveal
         round1 = result.get("round1", {})
@@ -201,6 +210,17 @@ async def _generate_artifacts(session_id: str, pipeline_result: dict) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Routes
 # ─────────────────────────────────────────────────────────────────────────────
+@app.get("/")
+async def root():
+    return {
+        "name": "Daedalus AI Co-Founder API",
+        "version": "1.0.0",
+        "status": "running",
+        "docs": "http://localhost:8000/docs",
+        "health": "http://localhost:8000/health",
+    }
+
+
 @app.get("/health")
 async def health():
     return {

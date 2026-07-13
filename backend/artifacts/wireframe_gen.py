@@ -94,7 +94,7 @@ async def _generate_via_claude(ui_spec: dict, idea: str, api_key: str) -> str:
     )
 
     response = await client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-4-5",
         max_tokens=8000,
         messages=[{"role": "user", "content": user_prompt}],
         system=system_prompt,
@@ -114,17 +114,64 @@ async def _generate_via_claude(ui_spec: dict, idea: str, api_key: str) -> str:
 # Template fallback (no API required)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _normalize_screens(ui_spec: dict) -> list[dict[str, Any]]:
+    """Normalize UI agent output into {name, components} screen objects."""
+    raw_screens = ui_spec.get("screens", [])
+    normalized: list[dict[str, Any]] = []
+
+    for idx, screen in enumerate(raw_screens):
+        if isinstance(screen, str):
+            normalized.append(
+                {
+                    "name": screen,
+                    "components": [f"{screen} content panel", "Action controls"],
+                }
+            )
+            continue
+
+        if not isinstance(screen, dict):
+            continue
+
+        components = (
+            screen.get("components")
+            or screen.get("key_components")
+            or ([screen["purpose"]] if screen.get("purpose") else [])
+            or [f"{screen.get('name', f'Screen {idx + 1}')} module"]
+        )
+        normalized.append(
+            {
+                "name": screen.get("name") or f"Screen {idx + 1}",
+                "components": components,
+            }
+        )
+
+    if normalized:
+        return normalized
+
+    return [
+        {"name": "Dashboard", "components": ["KPI cards", "Activity feed", "Quick actions"]},
+        {"name": "Workspace", "components": ["Search bar", "Data table", "Detail panel"]},
+    ]
+
+
+def _product_label(idea: str) -> str:
+    cleaned = idea.strip()
+    return cleaned[:40] + ("…" if len(cleaned) > 40 else "")
+
+
 def _generate_from_template(ui_spec: dict, idea: str) -> str:
     """
     Render a rich, realistic HTML wireframe from the structured ui_spec
     without calling any external API. Uses Tailwind CSS CDN.
     """
-    ds = ui_spec.get("design_system", {})
-    primary = ds.get("primary_color", "#6366F1")
+    # Handle both live Gemini key (visual_style) and fallback key (design_system)
+    ds = ui_spec.get("design_system") or ui_spec.get("visual_style", {})
+    primary = ds.get("primary_color") or (ds.get("colors", ["#6366F1"])[0] if isinstance(ds.get("colors"), list) else "#6366F1")
     accent  = ds.get("accent_color",  "#10B981")
-    font    = ds.get("font",           "Inter")
-    screens = ui_spec.get("screens", [])
-    flows   = ui_spec.get("key_user_flows", [])
+    font    = ds.get("font") or ds.get("typography", "Inter")
+    screens = _normalize_screens(ui_spec)
+    flows   = ui_spec.get("key_user_flows") or ui_spec.get("wireframe_notes", [])
+    product_label = _product_label(idea)
 
     # Build nav items from screens
     nav_items_html = "\n".join(
@@ -144,8 +191,9 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
     for idx, s in enumerate(screens):
         s_id = _safe_id(s.get("name", f"screen_{idx}"))
         components = s.get("components", [])
-        is_first = "block" if idx == 0 else "none"
-        screen_panels_html += _render_screen_panel(s_id, s.get("name", ""), components, primary, accent, is_first)
+        screen_panels_html += _render_screen_panel(
+            s_id, s.get("name", ""), components, primary, accent, idea
+        )
 
     # User flows section
     flows_html = "\n".join(
@@ -198,7 +246,7 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
            style="background: var(--primary);">AI</div>
-      <span class="text-white font-semibold text-sm">{idea[:40]}</span>
+      <span class="text-white font-semibold text-sm">{product_label}</span>
       <span class="text-xs px-2 py-0.5 rounded-full badge-blue">Wireframe Preview</span>
     </div>
     <div class="flex items-center gap-3">
@@ -277,7 +325,7 @@ def _render_screen_panel(
     components: list[str],
     primary: str,
     accent: str,
-    display: str,
+    idea: str,
 ) -> str:
     """Render a single screen panel with its components as realistic UI blocks."""
     comp_blocks = ""
@@ -285,19 +333,19 @@ def _render_screen_panel(
         comp_lower = comp.lower()
 
         if "kpi" in comp_lower or "card" in comp_lower or "metric" in comp_lower:
-            comp_blocks += _kpi_cards(accent)
+            comp_blocks += _kpi_cards(accent, screen_name, idea)
         elif "table" in comp_lower or "list" in comp_lower or "directory" in comp_lower:
-            comp_blocks += _data_table(comp)
+            comp_blocks += _data_table(comp, screen_name, idea)
         elif "calendar" in comp_lower:
-            comp_blocks += _calendar_placeholder()
-        elif "chart" in comp_lower or "heatmap" in comp_lower:
-            comp_blocks += _chart_placeholder(primary)
+            comp_blocks += _calendar_placeholder(screen_name)
+        elif "chart" in comp_lower or "heatmap" in comp_lower or "analytics" in comp_lower:
+            comp_blocks += _chart_placeholder(primary, screen_name)
         elif "modal" in comp_lower or "panel" in comp_lower:
-            comp_blocks += _panel_block(comp)
+            comp_blocks += _panel_block(comp, idea)
         elif "search" in comp_lower or "filter" in comp_lower:
-            comp_blocks += _search_bar()
+            comp_blocks += _search_bar(screen_name, idea)
         else:
-            comp_blocks += _generic_block(comp, primary)
+            comp_blocks += _generic_block(comp, primary, idea)
 
     return f"""
 <div id="{screen_id}" class="screen-panel">
@@ -313,13 +361,15 @@ def _render_screen_panel(
 """
 
 
-def _kpi_cards(accent: str) -> str:
+def _kpi_cards(accent: str, screen_name: str, idea: str) -> str:
     cards = [
-        ("Total Employees", "247", "+12 this month", "👥"),
-        ("Attrition Risk", "8 High Risk", "↑ 3 from last month", "⚠️"),
-        ("Pending Approvals", "14", "5 urgent", "📋"),
-        ("Payroll Status", "₹12.4L", "Due in 3 days", "💰"),
+        (f"{screen_name} Items", "128", "+14 this week", "📊"),
+        ("Active Users", "1.2K", "↑ 8% vs last month", "👥"),
+        ("Pending Actions", "9", "3 urgent", "📋"),
+        ("Completion Rate", "86%", "Based on latest run", "✅"),
     ]
+    if idea:
+        cards[0] = (f"{screen_name} KPI", "128", f"Tracking: {idea[:28]}", "📊")
     cards_html = "".join(
         f"""
         <div class="card p-5 flex items-start gap-4">
@@ -335,13 +385,14 @@ def _kpi_cards(accent: str) -> str:
     return f'<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">{cards_html}</div>'
 
 
-def _data_table(label: str) -> str:
+def _data_table(label: str, screen_name: str, idea: str) -> str:
+    seed = [screen_name, idea[:24] or "Item"]
     rows = [
-        ("Priya Sharma",   "Engineering",    "Senior SDE",    "Low",    "badge-green"),
-        ("Rahul Gupta",    "Sales",           "AE",            "High",   "badge-red"),
-        ("Ananya Iyer",    "HR",              "HR Manager",    "Medium", "badge-blue"),
-        ("Kiran Patel",    "Product",         "PM",            "Low",    "badge-green"),
-        ("Suresh Kumar",   "Engineering",     "SDE-2",         "High",   "badge-red"),
+        (f"{seed[0]} Alpha", "Core", "Active", "Low", "badge-green"),
+        (f"{seed[0]} Beta", "Growth", "In Review", "Medium", "badge-blue"),
+        (f"{seed[1]} Pilot", "MVP", "Active", "Low", "badge-green"),
+        (f"{seed[0]} Delta", "Ops", "Blocked", "High", "badge-red"),
+        (f"{seed[1]} Launch", "GTM", "Queued", "Medium", "badge-blue"),
     ]
     rows_html = "".join(
         f"""
@@ -367,15 +418,15 @@ def _data_table(label: str) -> str:
 <div class="card overflow-hidden">
   <div class="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
     <p class="text-sm font-semibold text-white">{label}</p>
-    <span class="text-xs text-slate-500">5 of 247</span>
+    <span class="text-xs text-slate-500">5 records</span>
   </div>
   <table class="w-full">
     <thead>
       <tr class="text-xs text-slate-500 uppercase tracking-wide border-b border-slate-700">
         <th class="px-4 py-2 text-left">Name</th>
-        <th class="px-4 py-2 text-left">Dept</th>
-        <th class="px-4 py-2 text-left">Role</th>
-        <th class="px-4 py-2 text-left">Risk</th>
+        <th class="px-4 py-2 text-left">Category</th>
+        <th class="px-4 py-2 text-left">Status</th>
+        <th class="px-4 py-2 text-left">Priority</th>
         <th class="px-4 py-2 text-left">Action</th>
       </tr>
     </thead>
@@ -384,10 +435,10 @@ def _data_table(label: str) -> str:
 </div>"""
 
 
-def _calendar_placeholder() -> str:
-    return """
+def _calendar_placeholder(screen_name: str) -> str:
+    return f"""
 <div class="card p-5">
-  <p class="text-sm font-semibold text-white mb-4">📅 Leave Calendar — July 2025</p>
+  <p class="text-sm font-semibold text-white mb-4">📅 {screen_name} Calendar</p>
   <div class="grid grid-cols-7 gap-1 text-center">
     """ + "".join(
         f'<div class="text-xs text-slate-500 font-medium py-1">{d}</div>'
@@ -407,7 +458,7 @@ def _calendar_placeholder() -> str:
 </div>"""
 
 
-def _chart_placeholder(primary: str) -> str:
+def _chart_placeholder(primary: str, screen_name: str) -> str:
     bars = [65, 80, 45, 90, 72, 55, 88, 60, 75, 50, 95, 70]
     bars_html = "".join(
         f'<div class="flex-1 rounded-t-sm" style="height:{h}%; background: {primary}; opacity: {0.4 + i*0.05:.2f};"></div>'
@@ -415,7 +466,7 @@ def _chart_placeholder(primary: str) -> str:
     )
     return f"""
 <div class="card p-5">
-  <p class="text-sm font-semibold text-white mb-4">📈 Attrition Risk by Department</p>
+  <p class="text-sm font-semibold text-white mb-4">📈 {screen_name} Trends</p>
   <div class="flex items-end gap-1 h-32">
     {bars_html}
   </div>
@@ -427,18 +478,18 @@ def _chart_placeholder(primary: str) -> str:
 </div>"""
 
 
-def _panel_block(label: str) -> str:
+def _panel_block(label: str, idea: str) -> str:
     return f"""
 <div class="card p-5">
   <p class="text-sm font-semibold text-white mb-3">{label}</p>
   <div class="space-y-3">
     <div class="flex justify-between items-center text-sm">
-      <span class="text-slate-400">Component A</span>
-      <span class="text-white font-medium">Value 1</span>
+      <span class="text-slate-400">Workflow step</span>
+      <span class="text-white font-medium">Ready</span>
     </div>
     <div class="flex justify-between items-center text-sm">
-      <span class="text-slate-400">Component B</span>
-      <span class="text-white font-medium">Value 2</span>
+      <span class="text-slate-400">Context</span>
+      <span class="text-white font-medium">{idea[:32] or 'Current item'}</span>
     </div>
     <div class="h-px bg-slate-700"></div>
     <button class="w-full py-2 rounded-lg text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors">
@@ -448,12 +499,15 @@ def _panel_block(label: str) -> str:
 </div>"""
 
 
-def _search_bar() -> str:
-    return """
+def _search_bar(screen_name: str, idea: str) -> str:
+    placeholder = f"Search {screen_name.lower()}..."
+    if idea:
+        placeholder = f"Search {idea[:28].lower()}..."
+    return f"""
 <div class="flex gap-3">
   <div class="flex-1 relative">
     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
-    <input type="text" placeholder="Search employees, roles, departments..."
+    <input type="text" placeholder="{placeholder}"
            class="w-full pl-9 pr-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg
                   text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"/>
   </div>
@@ -463,11 +517,11 @@ def _search_bar() -> str:
 </div>"""
 
 
-def _generic_block(label: str, primary: str) -> str:
+def _generic_block(label: str, primary: str, idea: str) -> str:
     return f"""
 <div class="card p-5 border-l-4" style="border-left-color: {primary};">
   <p class="text-sm font-semibold text-white mb-1">{label}</p>
-  <p class="text-xs text-slate-500">Component rendered from UI spec</p>
+  <p class="text-xs text-slate-500">{idea[:72] or 'Component rendered from UI spec'}</p>
   <div class="mt-3 h-16 rounded-lg bg-slate-700/50 flex items-center justify-center">
     <span class="text-xs text-slate-500">Interactive component area</span>
   </div>

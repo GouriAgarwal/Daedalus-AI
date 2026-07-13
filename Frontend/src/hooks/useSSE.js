@@ -11,7 +11,8 @@
  */
 
 import { useState, useRef, useCallback } from 'react'
-import { API_BASE, FALLBACK_DATA } from '../utils/constants'
+import { API_BASE } from '../utils/constants'
+import { tailorFallbackForIdea } from '../utils/tailorFallback'
 import { sleep } from '../utils/helpers'
 
 /**
@@ -86,7 +87,7 @@ export function useSSE() {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
-      let accumulatedData = {}
+      let accumulatedData = { idea }
 
       while (true) {
         const { done, value } = await reader.read()
@@ -95,13 +96,15 @@ export function useSSE() {
 
         buffer += decoder.decode(value, { stream: true })
 
-        // Parse SSE lines — split on double newline (SSE event boundary)
-        const lines = buffer.split('\n')
-        buffer = lines.pop() // keep incomplete last line
+        // Split on SSE event boundary (double newline), keep incomplete last chunk
+        const events = buffer.split('\n\n')
+        buffer = events.pop() // last element is always incomplete or empty
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const raw = line.slice(6).trim()
+        for (const event of events) {
+          // Find the data: line within the event (ignores event:, id:, retry: lines)
+          const dataLine = event.split('\n').find((l) => l.startsWith('data: '))
+          if (!dataLine) continue
+          const raw = dataLine.slice(6).trim()
 
           if (raw === '[DONE]') {
             // Stream complete — sessionId already captured from last chunk
@@ -137,7 +140,7 @@ export function useSSE() {
 
       console.warn('SSE failed — switching to demo fallback:', err.message)
       // Auto-fallback when backend is unreachable
-      await runFallback(abortedRef, setState)
+      await runFallback(abortedRef, setState, idea)
     }
   }, []) // no dep on `reset` — we inline the abort logic above
 
@@ -151,8 +154,8 @@ export function useSSE() {
  *
  * Accepts abortedRef so it can bail out early if reset() is called mid-stream.
  */
-async function runFallback(abortedRef, setState) {
-  const data = FALLBACK_DATA
+async function runFallback(abortedRef, setState, idea) {
+  const data = tailorFallbackForIdea(idea)
   const agentOrder = []
 
   const emit = (partial, progress) => {
@@ -167,7 +170,7 @@ async function runFallback(abortedRef, setState) {
 
   // Round 1 — agents stream one by one
   const round1Agents = ['pm', 'ui', 'backend', 'marketing']
-  const partial = { domain: data.domain, round1: {} }
+  const partial = { idea, domain: data.domain, round1: {} }
 
   for (let i = 0; i < round1Agents.length; i++) {
     if (abortedRef.current) return
@@ -212,6 +215,7 @@ async function runFallback(abortedRef, setState) {
     ...s,
     data: {
       ...partial,
+      idea,
       round2_critique: data.round2_critique,
       startup_score: data.startup_score,
     },

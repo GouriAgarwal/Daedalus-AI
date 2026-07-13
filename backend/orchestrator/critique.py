@@ -6,6 +6,7 @@ from collections import defaultdict
 from typing import Any
 
 from . import agents
+from .normalize import _flatten_critique_item
 
 AGENT_NAMES = ("pm", "ui", "backend", "marketing")
 
@@ -33,8 +34,12 @@ def run_critique(round1: dict[str, Any], idea_context: dict[str, Any]) -> dict[s
     investor = agents.run_investor(critique_input)
     skeptic = agents.run_skeptic(critique_input)
     return {
-        "investor_concerns": investor.get("concerns", []),
-        "skeptic_flags": skeptic.get("flags", []),
+        "investor_concerns": [
+            _flatten_critique_item(c) for c in investor.get("concerns", [])
+        ],
+        "skeptic_flags": [
+            _flatten_critique_item(f) for f in skeptic.get("flags", [])
+        ],
         "investment_thesis": investor.get("investment_thesis"),
         "ask_readiness": investor.get("ask_readiness"),
         "killer_questions": skeptic.get("killer_questions", []),
