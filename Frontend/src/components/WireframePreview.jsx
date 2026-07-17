@@ -2,7 +2,7 @@
  * WireframePreview — Displays generated wireframe HTML inside an iframe
  * within a browser chrome mockup. Uses UI agent spec + idea for tailored preview.
  */
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Monitor, Maximize2, RefreshCw, X, ExternalLink, Layout } from 'lucide-react'
 import { API_BASE } from '../utils/constants'
@@ -19,6 +19,7 @@ export default function WireframePreview({ sessionId, uiSpec, idea, visible }) {
   const [fullscreen, setFullscreen] = useState(false)
   const [loading, setLoading]       = useState(true)
   const [reloadKey, setReloadKey]   = useState(0)
+  const [liveHtml, setLiveHtml]     = useState(null)
   const iframeRef = useRef(null)
 
   const isLiveSession = sessionId && !sessionId.startsWith('demo:')
@@ -28,6 +29,31 @@ export default function WireframePreview({ sessionId, uiSpec, idea, visible }) {
     () => generateWireframeHtml(uiSpec || {}, idea || 'Startup'),
     [uiSpec, idea]
   )
+
+  useEffect(() => {
+    if (visible && isLiveSession && apiUrl) {
+      setLoading(true)
+      fetch(apiUrl)
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          return res.text()
+        })
+        .then((html) => {
+          setLiveHtml(html)
+          setLoading(false)
+        })
+        .catch((err) => {
+          console.warn('Failed to fetch live wireframe, using local preview:', err)
+          setLiveHtml(null)
+          setLoading(false)
+        })
+    } else {
+      setLiveHtml(null)
+      setLoading(false)
+    }
+  }, [apiUrl, isLiveSession, visible, reloadKey])
+
+  const activeHtml = liveHtml || srcDoc
 
   const productLabel = (idea || 'Startup').length > 40
     ? `${(idea || 'Startup').slice(0, 39)}…`
@@ -123,7 +149,7 @@ export default function WireframePreview({ sessionId, uiSpec, idea, visible }) {
             <iframe
               ref={iframeRef}
               key={reloadKey}
-              srcDoc={srcDoc}
+              srcDoc={activeHtml}
               title="Wireframe Preview"
               onLoad={handleLoad}
               className="w-full h-full border-0"
@@ -144,7 +170,7 @@ export default function WireframePreview({ sessionId, uiSpec, idea, visible }) {
             <button
               onClick={() => setFullscreen(false)}
               className="w-8 h-8 rounded-xl hover:bg-white/10 flex items-center justify-center
-                         text-white/60 hover:text-white transition-all"
+              text-white/60 hover:text-white transition-all"
               aria-label="Close fullscreen"
             >
               <X size={16} />
@@ -152,7 +178,7 @@ export default function WireframePreview({ sessionId, uiSpec, idea, visible }) {
           </div>
           <iframe
             key={`fs-${reloadKey}`}
-            srcDoc={srcDoc}
+            srcDoc={activeHtml}
             title="Wireframe Fullscreen"
             className="flex-1 w-full border-0"
             sandbox="allow-scripts allow-same-origin"

@@ -59,7 +59,7 @@ def generate_code_skeleton(
         def add(filename: str, content: str) -> None:
             zf.writestr(f"{project_name}/{filename}", dedent(content).lstrip("\n"))
 
-        # Handle both live Gemini format (entities list) and fallback format (database_schema dict)
+        # Handle both entities list format and fallback database_schema dict format
         entities = backend_spec.get("entities", [])
         schema_raw = backend_spec.get("database_schema", {})
         if entities:
@@ -67,7 +67,7 @@ def generate_code_skeleton(
         else:
             schema = schema_raw
 
-        # Handle both live Gemini format (api_endpoints list-of-dicts) and fallback (key_endpoints list-of-strings)
+        # Handle api_endpoints list-of-dicts and fallback key_endpoints list-of-strings
         raw_endpoints = backend_spec.get("api_endpoints") or backend_spec.get("key_endpoints", [])
         endpoints = [
             f"{ep['method']} {ep['path']}" if isinstance(ep, dict) else ep
@@ -215,24 +215,24 @@ def _render_routes(endpoints: list[str], project_name: str) -> str:
 
         if method == "get":
             stub = (
-                f'@router.{method}("{path}", response_model={response_hint})\n'
-                f"async def {func_name}():\n"
-                f'    """TODO: implement — {ep}"""\n'
-                f"    raise HTTPException(status_code=501, detail=\"Not implemented\")"
+                f'@router.{method}("{path}")\n'
+                f"async def {func_name}(db: Session = Depends(get_db)):\n"
+                f'    """Return a list of items — implement filtering and pagination here."""\n'
+                f'    return {{"items": [], "total": 0, "page": 1}}'
             )
         elif method in ("post", "put", "patch"):
             stub = (
-                f'@router.{method}("{path}")\n'
-                f"async def {func_name}(data: dict):\n"
-                f'    """TODO: implement — {ep}"""\n'
-                f"    raise HTTPException(status_code=501, detail=\"Not implemented\")"
+                f'@router.{method}("{path}", status_code=201 if "{method}" == "post" else 200)\n'
+                f"async def {func_name}(data: dict, db: Session = Depends(get_db)):\n"
+                f'    """Create or update a resource — implement business logic here."""\n'
+                f'    return {{"status": "ok", "data": data}}'
             )
         else:
             stub = (
                 f'@router.{method}("{path}")\n'
-                f"async def {func_name}():\n"
+                f"async def {func_name}(db: Session = Depends(get_db)):\n"
                 f'    """TODO: implement — {ep}"""\n'
-                f"    raise HTTPException(status_code=501, detail=\"Not implemented\")"
+                f'    return {{"status": "ok"}}'
             )
         route_stubs.append(stub)
 
@@ -323,12 +323,18 @@ def _render_env_example(tech: dict) -> str:
         "# Copy this to .env and fill in real values",
         "",
         "DATABASE_URL=postgresql://user:password@localhost:5432/dbname",
-        "SECRET_KEY=your-secret-key-here",
-        "CORS_ORIGINS=http://localhost:3000",
-        "ANTHROPIC_API_KEY=your-anthropic-key",
+        "SECRET_KEY=change-me-in-production-use-openssl-rand-hex-32",
+        "CORS_ORIGINS=http://localhost:3000,http://localhost:5173",
     ]
+    if "jwt" in str(tech).lower():
+        lines.append("ACCESS_TOKEN_EXPIRE_MINUTES=60")
     if "redis" in str(tech).lower():
         lines.append("REDIS_URL=redis://localhost:6379")
+    if "stripe" in str(tech).lower() or "payment" in str(tech).lower():
+        lines += ["STRIPE_SECRET_KEY=sk_test_...",
+                  "STRIPE_WEBHOOK_SECRET=whsec_..."]
+    if "sendgrid" in str(tech).lower() or "email" in str(tech).lower():
+        lines.append("SENDGRID_API_KEY=SG.your-sendgrid-key")
     if "oauth" in str(tech).lower() or "google" in str(tech).lower():
         lines += ["GOOGLE_CLIENT_ID=your-google-client-id",
                   "GOOGLE_CLIENT_SECRET=your-google-client-secret"]

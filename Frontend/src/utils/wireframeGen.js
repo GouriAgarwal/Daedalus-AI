@@ -49,13 +49,24 @@ export function normalizeScreens(uiSpec = {}) {
 }
 
 function kpiCards(screenName, idea, primaryColor) {
+  const hash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (str.charCodeAt(i) + (h << 5) - h) | 0;
+    return Math.abs(h);
+  };
+  const ideaStr = idea || 'Startup';
+  const val1 = hash(ideaStr + screenName) % 250 + 20;
+  const val2 = ((hash(ideaStr) % 1500) / 10 + 10).toFixed(1);
+  const val3 = hash(screenName + ideaStr) % 15 + 1;
+  const val4 = 75 + (hash(ideaStr + "success") % 21);
+
   const cards = [
-    [`${screenName} Items`, '128', '+14 this week'],
-    ['Active Users', '1.2K', '↑ 8% vs last month'],
-    ['Pending Actions', '9', '3 urgent'],
-    ['Completion Rate', '86%', 'Latest run'],
+    [`Total ${screenName}s`, val1, `+${val1 % 12} this week`],
+    ['Active Users', `${val2}K`, '↑ 8% vs last month'],
+    ['Pending Tasks', val3, val3 > 8 ? 'Action required' : 'Monitor state'],
+    ['System Health', `${val4}%`, 'Optimized'],
   ]
-  if (idea) cards[0] = [`${screenName} KPI`, '128', `Tracking: ${idea.slice(0, 28)}`]
+  if (idea) cards[0] = [`${screenName} KPI`, val1, `Scope: ${idea.slice(0, 20)}...`]
 
   const cardsHtml = cards.map(([label, val, sub]) => `
     <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:4px;">
@@ -68,14 +79,32 @@ function kpiCards(screenName, idea, primaryColor) {
 }
 
 function dataTable(label, screenName, idea) {
+  const hash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (str.charCodeAt(i) + (h << 5) - h) | 0;
+    return Math.abs(h);
+  };
+  
   const seed = [screenName, (idea || 'Item').slice(0, 24)]
-  const rows = [
-    [`${seed[0]} Alpha`, 'Core',   'Active',    'Low',    '#10b981', 'rgba(16,185,129,0.15)'],
-    [`${seed[0]} Beta`,  'Growth', 'In Review', 'Medium', '#818cf8', 'rgba(99,102,241,0.15)'],
-    [`${seed[1]} Pilot`, 'MVP',    'Active',    'Low',    '#10b981', 'rgba(16,185,129,0.15)'],
-    [`${seed[0]} Delta`, 'Ops',    'Blocked',   'High',   '#ef4444', 'rgba(239,68,68,0.15)'],
-    [`${seed[1]} Launch','GTM`,    'Queued',    'Medium', '#818cf8', 'rgba(99,102,241,0.15)'],
-  ]
+  const statusOpts = ['Active', 'Pending', 'In Progress', 'Completed']
+  const priorityOpts = ['Low', 'Medium', 'High']
+  const colors = {
+    'Active': ['#10b981', 'rgba(16,185,129,0.15)'],
+    'Pending': ['#f59e0b', 'rgba(245,158,11,0.15)'],
+    'In Progress': ['#818cf8', 'rgba(99,102,241,0.15)'],
+    'Completed': ['#10b981', 'rgba(16,185,129,0.15)']
+  }
+
+  const rows = []
+  for (let i = 0; i < 5; i++) {
+    const num = hash(seed[1] + screenName + i);
+    const rowName = `${seed[0]} ${String.fromCharCode(65 + i)}`
+    const rowCat = num % 2 === 0 ? 'Core App' : 'Integration'
+    const status = statusOpts[num % statusOpts.length]
+    const priority = priorityOpts[num % priorityOpts.length]
+    const [badgeColor, badgeBg] = colors[status] || ['#818cf8', 'rgba(99,102,241,0.15)']
+    rows.push([rowName, rowCat, status, priority, badgeColor, badgeBg])
+  }
 
   const rowsHtml = rows.map(([name, cat, status, priority, badgeColor, badgeBg]) => `
     <tr style="border-bottom:1px solid #1e293b;">

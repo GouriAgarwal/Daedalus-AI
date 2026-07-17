@@ -1,40 +1,29 @@
-"""Gemini model call helpers for Person A agents."""
+"""
+agents.py — DeepSeek V3 API caller for the Master AI Co-Founder Orchestrator.
+Consolidates all 6 agents' outputs into a single, high-quality JSON call.
+"""
 
 from __future__ import annotations
 
 import json
 import os
 import re
-import time
+import asyncio
+import httpx
 from typing import Any
 
 from . import prompts
 
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 MAX_RETRIES = 5
-RETRY_CODES = {429, 503}
+RETRY_CODES = {429, 500, 502, 503, 504}
 
 
 class AgentCallError(RuntimeError):
-    """Raised when a Gemini response cannot be produced or parsed."""
-
-
-def _api_key_for(agent_name: str | None) -> str:
-    if agent_name:
-        specific_key = os.getenv(f"GEMINI_{agent_name.upper()}_API_KEY")
-        if specific_key:
-            return specific_key
-
-    shared_key = os.getenv("GEMINI_API_KEY")
-    if shared_key:
-        return shared_key
-
-    raise AgentCallError(
-        "Missing Gemini API key. Set GEMINI_API_KEY or GEMINI_<AGENT>_API_KEY."
-    )
+    """Raised when a model response cannot be produced or parsed."""
 
 
 def _extract_json(raw_text: str) -> dict[str, Any]:
+    """Clean markdown code fences from the JSON output if present."""
     text = raw_text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
@@ -45,95 +34,81 @@ def _extract_json(raw_text: str) -> dict[str, Any]:
     except json.JSONDecodeError:
         match = re.search(r"\{.*\}", text, flags=re.DOTALL)
         if not match:
-            raise AgentCallError("Gemini response did not contain JSON.")
+            raise AgentCallError("Response did not contain valid JSON.")
         parsed = json.loads(match.group(0))
 
     if not isinstance(parsed, dict):
-        raise AgentCallError("Gemini response JSON must be an object.")
+        raise AgentCallError("Response JSON must be an object.")
     return parsed
 
 
-def call_agent(
+async def call_deepseek_agent(
     system_prompt: str,
     input_json: dict[str, Any],
-    *,
-    agent_name: str | None = None,
-    api_key: str | None = None,
-    model: str | None = None,
 ) -> dict[str, Any]:
-    """Call Gemini for one agent and return parsed JSON."""
+    """Call DeepSeek API asynchronously for the master agent and return parsed JSON."""
+    api_key = os.getenv("DEEPSEEK_API_KEY")
+    if not api_key:
+        raise AgentCallError("Missing DEEPSEEK_API_KEY. Set it in backend/.env.")
 
-    try:
-        from google import genai
-        from google.genai import types
-    except ImportError as exc:
-        raise AgentCallError(
-            "google-genai is required for Gemini calls. Install google-genai."
-        ) from exc
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
 
-    client = genai.Client(api_key=api_key or _api_key_for(agent_name))
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": json.dumps(input_json, ensure_ascii=True)},
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0.3,
+    }
 
     last_exc: Exception | None = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = client.models.generate_content(
-                model=model or DEFAULT_MODEL,
-                contents=json.dumps(input_json, ensure_ascii=True),
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    response_mime_type="application/json",
-                    temperature=0.4,
-                ),
-            )
-            if not response.text:
-                raise AgentCallError("Gemini returned an empty response.")
-            return _extract_json(response.text)
+            # High timeout since generating the complete startup plan can take 15-45s
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.post(
+                    "https://api.deepseek.com/chat/completions",
+                    json=payload,
+                    headers=headers,
+                )
+                response.raise_for_status()
+                resp_data = response.json()
+                choices = resp_data.get("choices", [])
+                if not choices:
+                    raise AgentCallError("DeepSeek returned empty choices.")
+                content = choices[0].get("message", {}).get("content", "")
+                if not content:
+                    raise AgentCallError("DeepSeek returned empty content.")
+                return _extract_json(content)
         except Exception as exc:
+            last_exc = exc
             error_str = str(exc)
-            retryable = any(str(code) in error_str for code in RETRY_CODES)
+            
+            # Check for HTTP status codes that are retryable
+            status_code = None
+            if isinstance(exc, httpx.HTTPStatusError):
+                status_code = exc.response.status_code
+                
+            retryable = (
+                (status_code in RETRY_CODES) or 
+                isinstance(exc, (httpx.ConnectError, httpx.TimeoutException))
+            )
+            
             if retryable and attempt < MAX_RETRIES:
-                wait = 2 ** attempt  # exponential backoff: 2, 4, 8, 16, 32s
-                print(f"[Retry {attempt}/{MAX_RETRIES}] Transient error, retrying in {wait}s... ({exc})")
-                time.sleep(wait)
-                last_exc = exc
+                wait = 2 ** attempt  # 2s, 4s, 8s, 16s
+                print(f"[DeepSeek Retry {attempt}/{MAX_RETRIES}] Error: {exc}. Retrying in {wait}s...")
+                await asyncio.sleep(wait)
             else:
-                raise
+                raise AgentCallError(f"DeepSeek call failed: {exc}") from exc
 
     raise AgentCallError(f"Failed after {MAX_RETRIES} retries.") from last_exc
 
 
-def classify_domain(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(
-        prompts.DOMAIN_CLASSIFIER_PROMPT,
-        input_json,
-        agent_name="domain_classifier",
-    )
-
-
-def run_pm(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.PM_AGENT_PROMPT, input_json, agent_name="pm")
-
-
-def run_ui(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.UI_AGENT_PROMPT, input_json, agent_name="ui")
-
-
-def run_backend(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.BACKEND_AGENT_PROMPT, input_json, agent_name="backend")
-
-
-def run_marketing(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.MARKETING_AGENT_PROMPT, input_json, agent_name="marketing")
-
-
-def run_investor(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.INVESTOR_AGENT_PROMPT, input_json, agent_name="investor")
-
-
-def run_skeptic(input_json: dict[str, Any]) -> dict[str, Any]:
-    return call_agent(prompts.SKEPTIC_AGENT_PROMPT, input_json, agent_name="skeptic")
-
-
-def revise_agent(agent_name: str, input_json: dict[str, Any]) -> dict[str, Any]:
-    prompt = prompts.REVISION_PROMPTS[agent_name]
-    return call_agent(prompt, input_json, agent_name=agent_name)
+async def run_master_agent(idea: str) -> dict[str, Any]:
+    """Execute the complete virtual co-founder analysis for a startup idea."""
+    return await call_deepseek_agent(prompts.MASTER_AGENT_PROMPT, {"idea": idea})
