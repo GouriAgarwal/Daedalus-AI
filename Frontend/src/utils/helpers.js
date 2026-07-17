@@ -87,19 +87,24 @@ export const toTitleCase = (key) => {
  * @param {Object} scores
  * @returns {Array}
  */
+/**
+ * Canonical score dimension order — matches backend scoring.py.
+ * Missing keys default to 0 so the radar chart never shows NaN.
+ */
+const SCORE_DIMENSION_ORDER = [
+  { key: 'feasibility',     label: 'Feasibility' },
+  { key: 'market_size',     label: 'Market Size' },
+  { key: 'differentiation', label: 'Differentiation' },
+  { key: 'team_fit',        label: 'Team Fit' },
+  { key: 'innovation',      label: 'Innovation' },
+  { key: 'execution',       label: 'Execution' },
+]
+
 export const formatRadarData = (scores) => {
   if (!scores) return []
-  const labelMap = {
-    feasibility: 'Feasibility',
-    market_size: 'Market Size',
-    differentiation: 'Differentiation',
-    team_fit: 'Team Fit',
-    innovation: 'Innovation',
-    execution: 'Execution',
-  }
-  return Object.entries(scores).map(([key, value]) => ({
-    metric: labelMap[key] || toTitleCase(key),
-    score: value,
+  return SCORE_DIMENSION_ORDER.map(({ key, label }) => ({
+    metric: label,
+    score: scores[key] ?? 0,
     fullMark: 10,
   }))
 }

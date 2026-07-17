@@ -1,10 +1,14 @@
 /**
- * CritiqueThread — Chat-style timeline showing Investor/Skeptic concerns
- * and agent revisions with before → after diff view.
+ * CritiqueThread — Chat-style timeline showing Investor/Skeptic concerns,
+ * investment thesis, killer questions, overall risk and agent revisions.
+ * Enhanced to display all rich fields from the upgraded agent prompts.
  */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { DollarSign, AlertTriangle, RefreshCw, ChevronRight, ArrowDown } from 'lucide-react'
+import {
+  DollarSign, AlertTriangle, RefreshCw, ChevronRight,
+  ArrowDown, HelpCircle, TrendingUp, ShieldAlert, CheckCircle2
+} from 'lucide-react'
 
 /**
  * @param {Object} props
@@ -13,10 +17,31 @@ import { DollarSign, AlertTriangle, RefreshCw, ChevronRight, ArrowDown } from 'l
 export default function CritiqueThread({ critique }) {
   if (!critique) return null
 
-  const { investor_concerns = [], skeptic_flags = [], revisions = {} } = critique
+  const {
+    investor_concerns = [],
+    skeptic_flags = [],
+    revisions = {},
+    investment_thesis,
+    ask_readiness,
+    killer_questions = [],
+    overall_risk,
+  } = critique
+
   const hasContent = investor_concerns.length > 0 || skeptic_flags.length > 0
 
   if (!hasContent) return null
+
+  const readinessColor = {
+    low:    '#EF4444',
+    medium: '#F59E0B',
+    high:   '#22C55E',
+  }[ask_readiness] || '#64748B'
+
+  const riskColor = {
+    low:    '#22C55E',
+    medium: '#F59E0B',
+    high:   '#EF4444',
+  }[overall_risk] || '#64748B'
 
   return (
     <motion.section
@@ -33,10 +58,81 @@ export default function CritiqueThread({ critique }) {
           <RefreshCw size={15} style={{ color: '#F59E0B' }} />
         </div>
         <div>
-          <h2 className="text-white font-semibold text-base">Critique & Revision</h2>
-          <p className="text-white/40 text-xs">Investor & Skeptic debate · PM responds</p>
+          <h2 className="text-white font-semibold text-base">Critique &amp; Revision</h2>
+          <p className="text-white/40 text-xs">Investor &amp; Skeptic debate · PM responds</p>
         </div>
       </div>
+
+      {/* Summary badges row */}
+      {(investment_thesis || ask_readiness || overall_risk) && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"
+        >
+          {/* Investment Thesis */}
+          {investment_thesis && (
+            <div className="glass rounded-xl p-4 border border-white/[0.07] col-span-1 sm:col-span-3">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp size={12} className="text-emerald-400" />
+                <span className="text-[10px] uppercase tracking-widest text-white/40">Investment Thesis</span>
+              </div>
+              <p className="text-white/75 text-sm leading-relaxed">{investment_thesis}</p>
+            </div>
+          )}
+
+          {/* Ask Readiness */}
+          {ask_readiness && (
+            <div className="glass rounded-xl p-4 border border-white/[0.07]">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign size={12} style={{ color: readinessColor }} />
+                <span className="text-[10px] uppercase tracking-widest text-white/40">Ask Readiness</span>
+              </div>
+              <span
+                className="text-sm font-bold uppercase tracking-wide"
+                style={{ color: readinessColor }}
+              >
+                {ask_readiness}
+              </span>
+            </div>
+          )}
+
+          {/* Overall Risk */}
+          {overall_risk && (
+            <div className="glass rounded-xl p-4 border border-white/[0.07]">
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldAlert size={12} style={{ color: riskColor }} />
+                <span className="text-[10px] uppercase tracking-widest text-white/40">Overall Risk</span>
+              </div>
+              <span
+                className="text-sm font-bold uppercase tracking-wide"
+                style={{ color: riskColor }}
+              >
+                {overall_risk}
+              </span>
+            </div>
+          )}
+
+          {/* Killer Questions */}
+          {killer_questions.length > 0 && (
+            <div className="glass rounded-xl p-4 border border-white/[0.07]">
+              <div className="flex items-center gap-2 mb-2">
+                <HelpCircle size={12} className="text-purple-400" />
+                <span className="text-[10px] uppercase tracking-widest text-white/40">Killer Questions</span>
+              </div>
+              <ul className="space-y-1">
+                {killer_questions.slice(0, 3).map((q, i) => (
+                  <li key={i} className="text-xs text-white/60 leading-relaxed flex items-start gap-1.5">
+                    <span className="mt-1.5 w-1 h-1 rounded-full bg-purple-400 flex-shrink-0" />
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </motion.div>
+      )}
 
       <div className="relative">
         {/* Timeline vertical line */}
@@ -91,7 +187,7 @@ const formatRevisionItem = (item) => {
   return JSON.stringify(item)
 }
 
-/* ── Critique bubble ──────────────────────────────────────────────── */
+/* ── Critique bubble ────────────────────────────────────────────────────────── */
 
 const BUBBLE_CONFIG = {
   investor: {
@@ -129,9 +225,9 @@ function CritiqueBubble({ type, text, index }) {
       <div
         className="absolute -left-[2.75rem] top-3 w-3 h-3 rounded-full border-2"
         style={{
-          background: cfg.dotColor,
+          background:  cfg.dotColor,
           borderColor: '#050816',
-          boxShadow: `0 0 8px ${cfg.dotColor}88`,
+          boxShadow:   `0 0 8px ${cfg.dotColor}88`,
         }}
       />
 
@@ -161,15 +257,15 @@ function CritiqueBubble({ type, text, index }) {
   )
 }
 
-/* ── Revision block (before → after) ─────────────────────────────── */
+/* ── Revision block (before → after) ─────────────────────────────────────────  */
 
 function RevisionBlock({ agentKey, revision, index }) {
   const [showBefore, setShowBefore] = useState(false)
 
   const agentColors = {
-    pm:      { color: '#7C3AED', label: 'PM Agent' },
-    ui:      { color: '#38BDF8', label: 'UI Designer' },
-    backend: { color: '#22C55E', label: 'Backend Architect' },
+    pm:        { color: '#7C3AED', label: 'PM Agent' },
+    ui:        { color: '#38BDF8', label: 'UI Designer' },
+    backend:   { color: '#22C55E', label: 'Backend Architect' },
     marketing: { color: '#EC4899', label: 'Marketing' },
   }
   const cfg = agentColors[agentKey] || { color: '#7C3AED', label: agentKey }
@@ -185,9 +281,9 @@ function RevisionBlock({ agentKey, revision, index }) {
       <div
         className="absolute -left-[2.75rem] top-3 w-3 h-3 rounded-full border-2"
         style={{
-          background: cfg.color,
+          background:  cfg.color,
           borderColor: '#050816',
-          boxShadow:  `0 0 8px ${cfg.color}88`,
+          boxShadow:   `0 0 8px ${cfg.color}88`,
         }}
       />
 
@@ -201,7 +297,7 @@ function RevisionBlock({ agentKey, revision, index }) {
           style={{ background: `${cfg.color}12` }}
         >
           <div className="flex items-center gap-2">
-            <RefreshCw size={13} style={{ color: cfg.color }} />
+            <CheckCircle2 size={13} style={{ color: cfg.color }} />
             <span className="text-xs font-semibold" style={{ color: cfg.color }}>
               {cfg.label} Revised
             </span>

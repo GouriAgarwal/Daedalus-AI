@@ -6,6 +6,7 @@ python-multipart==0.0.9
 # ── LLM / Orchestration ───────────────────────────────────────────────────────
 google-genai>=1.0.0        # Person A: Gemini agents (domain classifier, PM, UI, backend, marketing, investor, skeptic)
 anthropic>=0.26.1          # Person B: wireframe_gen HTML generation via Claude
+langgraph>=0.1.0           # LangGraph StateGraph for multi-agent pipeline orchestration
 
 # ── Artifact Generation ───────────────────────────────────────────────────────
 python-pptx==0.6.23        # pitch deck slides
