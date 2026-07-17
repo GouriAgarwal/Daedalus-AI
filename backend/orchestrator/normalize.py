@@ -232,12 +232,21 @@ def normalize_critique(critique: dict[str, Any]) -> dict[str, Any]:
     if not critique:
         return critique
     result = dict(critique)
+
+    # Flatten structured concern/flag objects → human-readable strings
     result["investor_concerns"] = [
         _flatten_critique_item(c) for c in critique.get("investor_concerns", [])
     ]
     result["skeptic_flags"] = [
         _flatten_critique_item(f) for f in critique.get("skeptic_flags", [])
     ]
+
+    # Preserve rich fields from upgraded investor/skeptic prompts
+    result["investment_thesis"] = critique.get("investment_thesis") or ""
+    result["ask_readiness"] = critique.get("ask_readiness") or "low"
+    result["killer_questions"] = _as_list(critique.get("killer_questions"))
+    result["overall_risk"] = critique.get("overall_risk") or "medium"
+
     return result
 
 
