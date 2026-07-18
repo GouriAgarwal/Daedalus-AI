@@ -22,7 +22,7 @@ export default function Footer() {
                 style={{ background: 'linear-gradient(135deg, #7C3AED, #38BDF8)' }}>
                 <Zap size={14} className="text-white" fill="white" />
               </div>
-              <span className="text-white font-semibold text-sm">AI Co-Founder Team</span>
+              <span className="text-white font-semibold text-sm">Daedalus-AI</span>
             </div>
             <p className="text-white/30 text-xs max-w-xs text-center md:text-left leading-relaxed">
               Multi-agent AI startup validator. Built for hackathons, designed for founders.
@@ -38,7 +38,7 @@ export default function Footer() {
 
           {/* Links */}
           <div className="flex items-center gap-3">
-            <FooterLink href="https://github.com" icon={<Github size={13} />} label="GitHub" />
+            <FooterLink href="https://github.com/GouriAgarwal/Daedalus-AI" icon={<Github size={13} />} label="GitHub" />
             <FooterLink href="#" icon={<ExternalLink size={13} />} label="Docs" />
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function Footer() {
         {/* Bottom divider */}
         <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-center justify-center">
           <p className="text-white/15 text-[11px] text-center">
-            © 2026 AI Co-Founder Team · Powered by Claude Sonnet · Built on LangGraph
+            © 2026 Daedalus-AI · Powered by Hacksmiths
           </p>
         </div>
       </div>

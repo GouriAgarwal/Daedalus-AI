@@ -32,6 +32,7 @@ const TECH_LOGS = [
  */
 export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
   const [logIndex, setLogIndex] = useState(0)
+  const [displayedProgress, setDisplayedProgress] = useState(0)
 
   // Rotate through tech logs automatically every 1.8 seconds while loading
   useEffect(() => {
@@ -44,6 +45,27 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
     }, 1800)
     return () => clearInterval(timer)
   }, [visible])
+
+  // Sync displayedProgress with target progress and run a smooth trickle timer
+  useEffect(() => {
+    if (!visible) {
+      setDisplayedProgress(0)
+      return
+    }
+    const timer = setInterval(() => {
+      setDisplayedProgress((prev) => {
+        if (prev < progress) {
+          // Decelerating catchup
+          return Math.min(prev + Math.max(1, (progress - prev) * 0.12), progress)
+        } else if (prev < 98) {
+          // Continuous micro-trickle to prevent freeze-look
+          return prev + 0.15
+        }
+        return prev
+      })
+    }, 80)
+    return () => clearInterval(timer)
+  }, [progress, visible])
 
   // Get active logs window to display (current and previous two logs)
   const activeLogs = [
@@ -102,10 +124,10 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
                 Daedalus Engine Compiling...
               </h3>
               <p className="text-white/40 text-xs mt-1 italic min-h-[16px]">
-                {progress < 35  ? 'Mapping product strategy algorithms'
-                 : progress < 55 ? 'Generating dynamic wireframe screens'
-                 : progress < 75 ? 'Running security and critique solvers'
-                 : progress < 90 ? 'Drawing vector presentation graphics'
+                {displayedProgress < 35  ? 'Mapping product strategy algorithms'
+                 : displayedProgress < 55 ? 'Generating dynamic wireframe screens'
+                 : displayedProgress < 75 ? 'Running security and critique solvers'
+                 : displayedProgress < 90 ? 'Drawing vector presentation graphics'
                  : 'Packaging boilerplate workspace'}
               </p>
             </div>
@@ -232,12 +254,12 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
             <div className="w-full">
               <div className="flex justify-between text-xs text-white/30 mb-2">
                 <span>Build Progress</span>
-                <span className="font-semibold text-white/60">{Math.round(progress)}%</span>
+                <span className="font-semibold text-white/60">{Math.round(displayedProgress)}%</span>
               </div>
               <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden relative">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#00f5d4]"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${displayedProgress}%` }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                 />
                 {/* sweeping glowing sheen line */}
@@ -253,12 +275,12 @@ export default function LoadingOverlay({ visible, progress, doneAgents = [] }) {
             <div className="grid grid-cols-3 gap-2.5 w-full">
               {AGENTS.map((agent) => {
                 const done = doneAgents.includes(agent.id)
-                // Identify the co-founder currently working
+                // Identify the co-founder currently working based on displayedProgress
                 const isActiveWorker = !done && (
-                  (agent.id === 'pm' && progress < 35) ||
-                  (agent.id === 'ui' && progress >= 35 && progress < 55) ||
-                  (agent.id === 'backend' && progress >= 55 && progress < 75) ||
-                  (agent.id === 'marketing' && progress >= 75 && progress < 90)
+                  (agent.id === 'pm' && displayedProgress < 35) ||
+                  (agent.id === 'ui' && displayedProgress >= 35 && displayedProgress < 55) ||
+                  (agent.id === 'backend' && displayedProgress >= 55 && displayedProgress < 75) ||
+                  (agent.id === 'marketing' && displayedProgress >= 75 && displayedProgress < 90)
                 )
 
                 return (

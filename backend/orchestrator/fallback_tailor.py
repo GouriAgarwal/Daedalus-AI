@@ -56,6 +56,11 @@ def tailor_fallback_for_idea(idea: str, base: dict[str, Any] | None = None) -> d
         sample = copy.deepcopy(sample["samples"][0])
 
     sample["idea"] = idea
+    # Fallback name generator
+    words = [w for w in idea.split() if w.lower() not in ("a", "an", "the", "for", "with", "app", "website", "platform", "tool")]
+    base_name = words[0].title() if words else "Daedalus"
+    base_name = "".join(c for c in base_name if c.isalnum())
+    sample["startup_name"] = f"{base_name}ify" if len(base_name) >= 4 else f"{base_name}flow"
     sample["domain"] = domain
     sample.setdefault("idea_context", {})
     sample["idea_context"].update(

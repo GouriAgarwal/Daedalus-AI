@@ -87,6 +87,32 @@ def _score_color(val: float, primary: RGBColor, accent: RGBColor) -> RGBColor:
     return RGBColor(0xFF, 0x55, 0x55)  # Glowing Tech Red
 
 
+def _extract_bullets(text_or_list: Any) -> list[str]:
+    """Helper to convert a string (splitting by sentences/newlines) or a list to 3-4 descriptive bullets."""
+    if not text_or_list:
+        return []
+    if isinstance(text_or_list, list):
+        return [str(item) for item in text_or_list if item]
+    
+    text = str(text_or_list).strip()
+    text = text.replace("- ", "").replace("* ", "")
+    import re
+    # Split by newlines first
+    lines = [l.strip() for l in text.split("\n") if len(l.strip()) > 5]
+    if len(lines) >= 3:
+        return lines[:4]
+        
+    # Otherwise split by sentences
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    bullets = [s.strip() for s in sentences if len(s.strip()) > 8]
+    
+    if len(bullets) < 2:
+        parts = text.split(";")
+        bullets = [p.strip() for p in parts if len(p.strip()) > 5]
+        
+    return bullets[:4]
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Vector Graphic Primitives (Arrows & Lines)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -146,7 +172,7 @@ def generate_pitch_deck(pipeline_result: dict[str, Any]) -> bytes:
     prs.slide_width  = SLIDE_W
     prs.slide_height = SLIDE_H
 
-    idea    = pipeline_result.get("idea", "Your Startup")
+    idea    = pipeline_result.get("startup_name") or pipeline_result.get("idea", "Your Startup")
     domain  = pipeline_result.get("domain", "SaaS")
     r1      = pipeline_result.get("round1", {})
     pm      = r1.get("pm", {})
@@ -166,24 +192,28 @@ def generate_pitch_deck(pipeline_result: dict[str, Any]) -> bytes:
     # ── SLIDE 1: Cover ────────────────────────────────────────────────────────
     _slide_cover(prs, idea, pm.get("tagline", ""), domain, primary, accent, font)
 
-    # ── SLIDE 2: Problem ──────────────────────────────────────────────────────
-    _slide_text_focus(
+    # ── SLIDE 2: Problem (Bullet Points!) ─────────────────────────────────────
+    problem_bullets = _extract_bullets(pm.get("problem", ""))
+    _slide_bullets(
         prs,
         title="The Problem",
         icon="🚨",
-        body=pm.get("problem", ""),
-        sub=f'Target Audience: {", ".join(pm.get("target_users", []) or [pm.get("target_user", "")])}',
-        primary=primary, accent=primary, font_name=font,
+        bullets=problem_bullets,
+        primary=primary, accent=primary,
+        subtitle=f'Target Audience: {", ".join(pm.get("target_users", []) or [pm.get("target_user", "")])}',
+        font_name=font,
     )
 
-    # ── SLIDE 3: Solution ─────────────────────────────────────────────────────
-    _slide_text_focus(
+    # ── SLIDE 3: Solution (Bullet Points!) ────────────────────────────────────
+    solution_bullets = _extract_bullets(pm.get("solution", ""))
+    _slide_bullets(
         prs,
         title="Our Solution",
         icon="💡",
-        body=pm.get("solution", ""),
-        sub=pm.get("mvp_scope", ""),
-        primary=primary, accent=accent, font_name=font,
+        bullets=solution_bullets,
+        primary=primary, accent=accent,
+        subtitle=pm.get("mvp_scope", ""),
+        font_name=font,
     )
 
     # ── SLIDE 4: MVP Features ─────────────────────────────────────────────────
@@ -230,35 +260,26 @@ def generate_pitch_deck(pipeline_result: dict[str, Any]) -> bytes:
         primary=primary, accent=accent, card_bg=card_bg, font_name=font,
     )
 
-    # ── SLIDE 8: Market Opportunity ───────────────────────────────────────────
+    # ── SLIDE 8: Market Opportunity (Funnel Progression with Flow Arrows!) ───
     tam_sam_som = mktg.get("tam_sam_som", {})
-    market_items= [f"{k}: {v}" for k, v in tam_sam_som.items()]
-    _slide_two_col(
+    _slide_market_funnel(
         prs,
         title="Market Opportunity",
-        left_header="Market Size",
-        left_items=[f"📊  {m}" for m in market_items] or ["📊  Large and growing market"],
-        right_header="Competitive Edge",
-        right_items=[
-            f"🎯  {mktg.get('positioning', '')}",
-        ] + [f"◆  {c}" for c in mktg.get("competitors", [])[:4]],
+        tam_sam_som=tam_sam_som,
+        positioning=mktg.get("positioning", ""),
+        competitors=mktg.get("competitors", []),
         primary=primary, accent=accent, card_bg=card_bg, font_name=font,
     )
 
-    # ── SLIDE 9: Go-To-Market ─────────────────────────────────────────────────
+    # ── SLIDE 9: Go-To-Market (Descriptive with Funnel Wireframe!) ────────────
     channels = mktg.get("channels", [])
     pricing  = mktg.get("pricing", {})
     price_lines = [f"{tier.capitalize()}: {desc}" for tier, desc in pricing.items()] if isinstance(pricing, dict) else []
-    _slide_two_col(
+    _slide_gtm_funnel(
         prs,
         title="Go-To-Market Strategy",
-        left_header="Acquisition Channels",
-        left_items=[f"→  {c}" for c in channels[:6]],
-        right_header="Pricing Tiers",
-        right_items=[f"▸  {p}" for p in (price_lines or [
-            f"CAC: {mktg.get('target_cac', 'TBD')}",
-            f"LTV: {mktg.get('target_ltv', 'TBD')}",
-        ])[:5]],
+        channels=channels,
+        pricing=price_lines or ["Standard Subscription Tier"],
         primary=primary, accent=accent, card_bg=card_bg, font_name=font,
     )
 
@@ -451,7 +472,7 @@ def _slide_cover(
 
     # Footer label - Neon Green footer
     footer_color = NEON_GREEN if is_end_card else TEXT_MUTED
-    footer = "AI Co-Founder Team  |  Powered by DeepSeek" if is_end_card else "Confidential — AI Co-Founder Team"
+    footer = "Daedalus-AI" if is_end_card else "Daedalus--AI"
     _txt(slide, footer, 0.8, 6.9, 9.0, 0.5,
          size=11, color=footer_color, font_name=font_name)
 
@@ -479,8 +500,10 @@ def _slide_text_focus(
 
     # Large body text in a card
     _rect(slide, 0.35, 1.55, 12.55, 4.2, CARD_BG)
+    # Shrink font size dynamically for longer, descriptive texts to fit perfectly
+    font_size = 18 if len(body) < 250 else (15 if len(body) < 450 else 13.5)
     _txt(slide, body, 0.65, 1.75, 12.0, 3.8,
-         size=18, color=TEXT_BODY, wrap=True, font_name=font_name)
+         size=font_size, color=TEXT_BODY, wrap=True, font_name=font_name)
 
     # Sub-text card
     if sub:
@@ -764,6 +787,135 @@ def _slide_tech_schema(
         # Dot nodes on ends
         _rect(slide, 9.67, 3.87, 0.1, 0.1, primary)
         _rect(slide, 9.67, 4.27, 0.1, 0.1, primary)
+
+
+def _slide_market_funnel(
+    prs: Presentation,
+    title: str,
+    tam_sam_som: dict[str, str],
+    positioning: str,
+    competitors: list[str],
+    primary: RGBColor,
+    accent: RGBColor,
+    card_bg: RGBColor,
+    font_name: str = "Segoe UI",
+) -> None:
+    """Market Opportunity Slide — displays TAM, SAM, and SOM as cards in a horizontal chain with arrows."""
+    slide = _blank_slide(prs)
+    _fill_bg(slide, DARK_BG, SLIDE_BG_PATH)
+
+    _rect(slide, 0, 0, 0.1, 7.5, primary)
+    _txt(slide, f"📈  {title}", 0.35, 0.3, 12.5, 0.9, size=30, bold=True, color=TEXT_TITLE, font_name=font_name)
+    _rect(slide, 0.35, 1.3, 12.65, 0.055, primary)
+
+    # TAM -> SAM -> SOM Funnel Cards
+    card_w = 3.6
+    card_h = 1.6
+    
+    # TAM Card
+    _rect(slide, 0.35, 1.6, card_w, card_h, card_bg)
+    _rect(slide, 0.35, 1.6, card_w, 0.06, primary)
+    _txt(slide, "TAM (Total Market)", 0.6, 1.7, card_w - 0.5, 0.3, size=11, bold=True, color=primary, font_name=font_name)
+    _txt(slide, tam_sam_som.get("tam") or tam_sam_som.get("TAM") or "Total Addressable Market", 0.6, 2.0, card_w - 0.5, 1.0, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Arrow 1
+    _draw_right_arrow(slide, 4.05, 2.2, 0.2, accent)
+
+    # SAM Card
+    _rect(slide, 4.35, 1.6, card_w, card_h, card_bg)
+    _rect(slide, 4.35, 1.6, card_w, 0.06, accent)
+    _txt(slide, "SAM (Serviceable Market)", 4.6, 1.7, card_w - 0.5, 0.3, size=11, bold=True, color=accent, font_name=font_name)
+    _txt(slide, tam_sam_som.get("sam") or tam_sam_som.get("SAM") or "Serviceable Addressable Market", 4.6, 2.0, card_w - 0.5, 1.0, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Arrow 2
+    _draw_right_arrow(slide, 8.05, 2.2, 0.2, accent)
+
+    # SOM Card
+    _rect(slide, 8.35, 1.6, card_w, card_h, card_bg)
+    _rect(slide, 8.35, 1.6, card_w, 0.06, NEON_CYAN)
+    _txt(slide, "SOM (Obtainable Market)", 8.6, 1.7, card_w - 0.5, 0.3, size=11, bold=True, color=NEON_CYAN, font_name=font_name)
+    _txt(slide, tam_sam_som.get("som") or tam_sam_som.get("SOM") or "Obtainable Target Segment", 8.6, 2.0, card_w - 0.5, 1.0, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Bottom Row Cards (Highly detailed descriptions with bullet points)
+    y2 = 3.5
+    w2 = 5.8
+    h2 = 3.5
+    
+    # Left Card: Competitive positioning
+    _rect(slide, 0.35, y2, w2, h2, card_bg)
+    _rect(slide, 0.35, y2, w2, 0.45, _mix(DARK_BG, accent, 0.3))
+    _txt(slide, "Strategic Market Positioning", 0.55, y2 + 0.08, w2 - 0.4, 0.35, size=14, bold=True, color=accent, font_name=font_name)
+    
+    positioning_bullets = _extract_bullets(positioning)
+    _multiline_txt(slide, [f"▸ {b}" for b in positioning_bullets], 0.55, y2 + 0.65, w2 - 0.4, h2 - 0.8, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Right Card: Competitors
+    _rect(slide, 6.75, y2, w2, h2, card_bg)
+    _rect(slide, 6.75, y2, w2, 0.45, _mix(DARK_BG, primary, 0.3))
+    _txt(slide, "Competitor Landscape", 6.95, y2 + 0.08, w2 - 0.4, 0.35, size=14, bold=True, color=primary, font_name=font_name)
+    
+    competitors_list = competitors if isinstance(competitors, list) else [str(competitors)]
+    _multiline_txt(slide, [f"◆ {c}" for c in competitors_list[:5]], 6.95, y2 + 0.65, w2 - 0.4, h2 - 0.8, size=13, color=TEXT_BODY, font_name=font_name)
+
+
+def _slide_gtm_funnel(
+    prs: Presentation,
+    title: str,
+    channels: list[str],
+    pricing: list[str],
+    primary: RGBColor,
+    accent: RGBColor,
+    card_bg: RGBColor,
+    font_name: str = "Segoe UI",
+) -> None:
+    """Go-To-Market Slide — structured with acquisition channels on the left and a conversion funnel wireframe on the right."""
+    slide = _blank_slide(prs)
+    _fill_bg(slide, DARK_BG, SLIDE_BG_PATH)
+
+    _rect(slide, 0, 0, 0.1, 7.5, primary)
+    _txt(slide, f"🚀  {title}", 0.35, 0.3, 12.5, 0.9, size=30, bold=True, color=TEXT_TITLE, font_name=font_name)
+    _rect(slide, 0.35, 1.3, 12.65, 0.055, primary)
+
+    # Left: Descriptive Cards
+    # Card 1: Channels
+    _rect(slide, 0.35, 1.6, 6.0, 2.5, card_bg)
+    _rect(slide, 0.35, 1.6, 6.0, 0.45, _mix(DARK_BG, accent, 0.3))
+    _txt(slide, "Acquisition Channels", 0.55, 1.68, 5.6, 0.35, size=14, bold=True, color=accent, font_name=font_name)
+    
+    channels_list = channels if isinstance(channels, list) else [str(channels)]
+    _multiline_txt(slide, [f"→  {c}" for c in channels_list[:5]], 0.55, 2.2, 5.6, 1.8, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Card 2: Pricing Strategy
+    _rect(slide, 0.35, 4.3, 6.0, 2.7, card_bg)
+    _rect(slide, 0.35, 4.3, 6.0, 0.45, _mix(DARK_BG, primary, 0.3))
+    _txt(slide, "Pricing & Monetization Tiers", 0.55, 4.38, 5.6, 0.35, size=14, bold=True, color=primary, font_name=font_name)
+    
+    pricing_list = pricing if isinstance(pricing, list) else [str(pricing)]
+    _multiline_txt(slide, [f"▸  {p}" for p in pricing_list[:5]], 0.55, 4.9, 5.6, 2.0, size=13, color=TEXT_BODY, font_name=font_name)
+
+    # Right: Conversion Funnel Wireframe Graphic Component (Decreasing widths with arrows)
+    funnel_x = 7.0
+    
+    # Level 1: Awareness
+    _rect(slide, funnel_x + 0.4, 1.6, 4.8, 1.0, CARD_BG, border=True, border_color=_mix(DARK_BG, primary, 0.3))
+    _txt(slide, "1. AWARENESS TRAFFIC", funnel_x + 0.6, 1.7, 4.4, 0.3, size=11, bold=True, color=primary, font_name=font_name)
+    _txt(slide, ", ".join(channels_list[:2]) if channels_list else "Digital Channels", funnel_x + 0.6, 2.0, 4.4, 0.5, size=10, color=TEXT_MUTED, font_name=font_name)
+
+    # Down Arrow 1
+    _draw_down_arrow(slide, funnel_x + 2.7, 2.7, 0.45, accent)
+
+    # Level 2: Conversion
+    _rect(slide, funnel_x + 0.9, 3.25, 3.8, 1.0, CARD_BG, border=True, border_color=_mix(DARK_BG, accent, 0.3))
+    _txt(slide, "2. CONVERTED LEADS", funnel_x + 1.1, 3.35, 3.4, 0.3, size=11, bold=True, color=accent, font_name=font_name)
+    _txt(slide, "Free Tier Onboarding", funnel_x + 1.1, 3.65, 3.4, 0.5, size=10, color=TEXT_MUTED, font_name=font_name)
+
+    # Down Arrow 2
+    _draw_down_arrow(slide, funnel_x + 2.7, 4.35, 0.45, accent)
+
+    # Level 3: Monetization
+    _rect(slide, funnel_x + 1.4, 4.9, 2.8, 1.0, CARD_BG, border=True, border_color=_mix(DARK_BG, NEON_CYAN, 0.3))
+    _txt(slide, "3. PAID CLIENTS", funnel_x + 1.6, 5.0, 2.4, 0.3, size=11, bold=True, color=NEON_CYAN, font_name=font_name)
+    _txt(slide, pricing_list[0] if pricing_list else "Monetized Subscriptions", funnel_x + 1.6, 5.3, 2.4, 0.5, size=10, color=TEXT_MUTED, font_name=font_name)
 
 
 def _slide_score(

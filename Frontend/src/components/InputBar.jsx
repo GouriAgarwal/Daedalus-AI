@@ -117,15 +117,15 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         className="text-center mb-8"
       >
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-          <span className="text-white">Your Idea,</span>
+          <span className="text-white">Daedalus-AI:</span>
           <br />
           <span style={{
-            background: 'linear-gradient(135deg, #7C3AED 0%, #38BDF8 50%, #EC4899 100%)',
+            background: 'linear-gradient(135deg, #00f5d4 0%, #38BDF8 50%, #7C3AED 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            Stress-Tested
+            Your Idea, Engineered
           </span>
         </h1>
         <p className="mt-4 text-white/50 text-lg max-w-xl mx-auto leading-relaxed">
@@ -144,7 +144,11 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         <div className={`relative rounded-2xl transition-all duration-300 ${
           focused ? 'shadow-[0_0_0_1px_rgba(124,58,237,0.5),0_0_40px_rgba(124,58,237,0.12)]' : ''
         }`}
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ 
+            background: 'rgba(10, 15, 36, 0.60)', 
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)' 
+          }}
         >
           {/* Typing animation placeholder */}
           {!idea && !focused && (

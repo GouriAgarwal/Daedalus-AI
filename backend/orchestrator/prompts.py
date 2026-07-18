@@ -113,6 +113,7 @@ QUALITY GATES (review before returning):
 
 Return ONLY valid JSON matching this EXACT structure (no extra keys, no markdown):
 {
+  "startup_name": "A premium, catchy, creative, and professional brand name for this startup (e.g. Daedalus, Stripe, Linear style)",
   "domain": "Short industry label — e.g. Pet Care / EdTech / FinTech / HealthTech",
   "idea_context": {
     "domain": "Same as above",
@@ -123,9 +124,9 @@ Return ONLY valid JSON matching this EXACT structure (no extra keys, no markdown
   },
   "round1": {
     "pm": {
-      "problem": "Specific, painful problem statement — not vague",
+      "problem": "Detailed, painful problem statement containing 3 to 4 distinct sentences or bullet points detailing the target user's friction points",
       "target_users": ["Specific user segment 1", "Specific user segment 2"],
-      "solution": "Precise product solution summary",
+      "solution": "Comprehensive, highly descriptive product solution summary explaining exactly how the MVP solves the friction points in detail",
       "mvp_features": [
         "Feature 1 — specific to this product",
         "Feature 2 — specific to this product",

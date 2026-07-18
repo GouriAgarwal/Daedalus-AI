@@ -59,23 +59,23 @@ export default function App() {
 
   // Auto-scroll to results when agents start appearing (first time active)
   useEffect(() => {
-    if (isActive && resultsRef.current) {
+    if (isDone && resultsRef.current) {
       const t = setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 500)
       return () => clearTimeout(t)
     }
-  }, [isActive]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDone]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll to score when it first appears
   useEffect(() => {
-    if (data?.startup_score && scoreRef.current) {
+    if (isDone && data?.startup_score && scoreRef.current) {
       const t = setTimeout(() => {
         scoreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 300)
       return () => clearTimeout(t)
     }
-  }, [data?.startup_score]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDone, data?.startup_score]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = useCallback((idea) => {
     startStream(idea)

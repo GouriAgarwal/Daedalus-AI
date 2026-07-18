@@ -24,6 +24,7 @@ from .fallback_tailor import tailor_fallback_for_idea
 
 class PipelineState(TypedDict, total=False):
     idea:           str
+    startup_name:   str
     domain:         str
     idea_context:   dict[str, Any]
     round1:         dict[str, Any]
@@ -71,8 +72,17 @@ async def _pipeline_direct(idea: str) -> PipelineState:
     round1          = master_result.get("round1", {})
     round2_critique = master_result.get("round2_critique", {})
 
+    generated_name = master_result.get("startup_name")
+    if not generated_name or len(generated_name.strip()) < 3:
+        # Fallback generator
+        words = [w for w in idea.split() if w.lower() not in ("a", "an", "the", "for", "with", "app", "website", "platform", "tool")]
+        base = words[0].title() if words else "Daedalus"
+        base = "".join(c for c in base if c.isalnum())
+        generated_name = f"{base}ify" if len(base) >= 4 else f"{base}flow"
+
     output: PipelineState = {
         "idea":           idea.strip(),
+        "startup_name":   generated_name.strip(),
         "domain":         domain,
         "idea_context":   idea_context,
         "round1":         round1,
