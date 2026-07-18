@@ -451,7 +451,7 @@ def _slide_cover(
 
     # Footer label - Neon Green footer
     footer_color = NEON_GREEN if is_end_card else TEXT_MUTED
-    footer = "AI Co-Founder Team  |  Powered by DeepSeek" if is_end_card else "Confidential — AI Co-Founder Team"
+    footer = "Daedalus-AI" if is_end_card else "Daedalus--AI"
     _txt(slide, footer, 0.8, 6.9, 9.0, 0.5,
          size=11, color=footer_color, font_name=font_name)
 
