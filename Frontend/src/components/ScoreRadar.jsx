@@ -45,9 +45,9 @@ export default function ScoreRadar({ scores }) {
     >
       {/* Section header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.3)' }}>
-          <Target size={15} style={{ color: '#38BDF8' }} />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-[0_0_12px_rgba(57,255,20,0.1)]"
+          style={{ background: 'rgba(57,255,20,0.1)', border: '1px solid rgba(57,255,20,0.25)' }}>
+          <Target size={15} style={{ color: '#39FF14' }} />
         </div>
         <div>
           <h2 className="text-white font-semibold text-base">Startup Score</h2>
@@ -119,7 +119,7 @@ export default function ScoreRadar({ scores }) {
           style={{ minHeight: 340 }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={14} style={{ color: '#38BDF8' }} />
+            <TrendingUp size={14} style={{ color: '#00F5D4' }} />
             <span className="text-white/60 text-sm">Score Radar</span>
           </div>
 
@@ -142,25 +142,25 @@ export default function ScoreRadar({ scores }) {
                 <Radar
                   name="Score"
                   dataKey="score"
-                  stroke="#7C3AED"
-                  fill="#7C3AED"
-                  fillOpacity={0.18}
+                  stroke="#39FF14"
+                  fill="#39FF14"
+                  fillOpacity={0.15}
                   strokeWidth={2}
-                  dot={{ fill: '#7C3AED', r: 4, strokeWidth: 0 }}
+                  dot={{ fill: '#39FF14', r: 4, strokeWidth: 0 }}
                   isAnimationActive
                   animationDuration={1400}
                   animationEasing="ease-out"
                 />
                 <Tooltip
                   contentStyle={{
-                    background: 'rgba(5,8,22,0.92)',
-                    border: '1px solid rgba(124,58,237,0.3)',
+                    background: 'rgba(6,12,28,0.92)',
+                    border: '1px solid rgba(57,255,20,0.3)',
                     borderRadius: '10px',
                     backdropFilter: 'blur(20px)',
                     fontFamily: 'Inter',
                     fontSize: 12,
                     color: '#fff',
-                    boxShadow: '0 0 20px rgba(124,58,237,0.2)',
+                    boxShadow: '0 0 20px rgba(57,255,20,0.2)',
                   }}
                   formatter={(value) => [`${value}/10`, 'Score']}
                 />
@@ -178,8 +178,8 @@ function ScoreBar({ item, index }) {
   const pct = (item.score / 10) * 100
 
   const barColor =
-    item.score >= 8 ? '#22C55E'
-    : item.score >= 6 ? '#38BDF8'
+    item.score >= 8 ? '#39FF14'
+    : item.score >= 6 ? '#00F5D4'
     : item.score >= 4 ? '#F59E0B'
     : '#EF4444'
 

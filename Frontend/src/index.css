@@ -12,15 +12,15 @@
 }
 
 :root {
-  --bg-primary: #050816;
-  --accent: #7C3AED;
-  --accent-light: #9F67FF;
-  --blue: #38BDF8;
-  --pink: #EC4899;
-  --green: #22C55E;
+  --bg-primary: #030712;
+  --accent: #39FF14;
+  --accent-light: #75FF5B;
+  --blue: #00F5D4;
+  --pink: #10B981;
+  --green: #39FF14;
   --orange: #F59E0B;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(6, 12, 28, 0.65);
+  --card-border: rgba(57, 255, 20, 0.15);
 }
 
 html {
@@ -48,18 +48,18 @@ body {
   background: rgba(255,255,255,0.02);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.4);
+  background: rgba(57, 255, 20, 0.35);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 58, 237, 0.7);
+  background: rgba(57, 255, 20, 0.7);
 }
 
 /* ================================================
    SELECTION
    ================================================ */
 ::selection {
-  background: rgba(124, 58, 237, 0.4);
+  background: rgba(57, 255, 20, 0.25);
   color: #fff;
 }
 
@@ -67,19 +67,20 @@ body {
    GLASS CARD
    ================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(6, 12, 28, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(57, 255, 20, 0.15);
 }
 
 .glass-hover {
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 .glass-hover:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(124, 58, 237, 0.4);
+  background: rgba(6, 12, 28, 0.8);
+  border-color: rgba(57, 255, 20, 0.4);
   transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(57, 255, 20, 0.1);
 }
 
 /* ================================================
@@ -90,7 +91,7 @@ body {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: #050816;
+  background: #030712;
 }
 
 .gradient-blob {
@@ -111,11 +112,11 @@ body {
    NEON GLOW TEXT
    ================================================ */
 .glow-text {
-  text-shadow: 0 0 20px rgba(124, 58, 237, 0.5), 0 0 60px rgba(124, 58, 237, 0.2);
+  text-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 60px rgba(57, 255, 20, 0.2);
 }
 
 .glow-text-blue {
-  text-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 0 60px rgba(56, 189, 248, 0.2);
+  text-shadow: 0 0 20px rgba(0, 245, 212, 0.5), 0 0 60px rgba(0, 245, 212, 0.2);
 }
 
 /* ================================================
@@ -129,7 +130,7 @@ body {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: linear-gradient(135deg, #7C3AED, #38BDF8, #EC4899, #7C3AED);
+  background: linear-gradient(135deg, #39FF14, #00F5D4, #10B981, #39FF14);
   background-size: 300% 300%;
   animation: gradientShift 4s ease infinite;
   z-index: -1;
@@ -226,7 +227,7 @@ body {
    ================================================ */
 .idea-textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.5), 0 0 30px rgba(124,58,237,0.15);
+  box-shadow: 0 0 0 1.5px rgba(57,255,20,0.6), 0 0 35px rgba(57,255,20,0.25);
 }
 
 /* ================================================
@@ -254,9 +255,15 @@ body {
    ================================================ */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(57,255,20,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.035) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridScroll 25s linear infinite;
+}
+
+@keyframes gridScroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
 }
 
 /* ================================================

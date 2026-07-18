@@ -5,11 +5,11 @@
 import { useEffect, useRef } from 'react'
 
 const BLOBS = [
-  { color: '#7C3AED', size: 700, x: '10%',  y: '20%',  delay: '0s',    duration: '14s' },
-  { color: '#38BDF8', size: 500, x: '75%',  y: '10%',  delay: '2s',    duration: '18s' },
-  { color: '#EC4899', size: 400, x: '60%',  y: '60%',  delay: '4s',    duration: '12s' },
-  { color: '#7C3AED', size: 350, x: '20%',  y: '75%',  delay: '6s',    duration: '20s' },
-  { color: '#22C55E', size: 300, x: '85%',  y: '80%',  delay: '3s',    duration: '16s' },
+  { color: 'rgba(57, 255, 20, 0.45)', size: 700, x: '10%',  y: '20%',  delay: '0s',    duration: '14s' },
+  { color: 'rgba(0, 245, 212, 0.45)', size: 500, x: '75%',  y: '10%',  delay: '2s',    duration: '18s' },
+  { color: 'rgba(16, 185, 129, 0.35)', size: 400, x: '60%',  y: '60%',  delay: '4s',    duration: '12s' },
+  { color: 'rgba(57, 255, 20, 0.35)', size: 350, x: '20%',  y: '75%',  delay: '6s',    duration: '20s' },
+  { color: 'rgba(0, 245, 212, 0.35)', size: 300, x: '85%',  y: '80%',  delay: '3s',    duration: '16s' },
 ]
 
 export default function AnimatedBackground() {
@@ -93,7 +93,7 @@ export default function AnimatedBackground() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #050816 100%)',
+          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #030712 100%)',
         }}
       />
     </div>

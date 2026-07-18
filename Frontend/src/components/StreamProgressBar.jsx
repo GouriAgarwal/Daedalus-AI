@@ -27,8 +27,8 @@ export default function StreamProgressBar({ visible, progress }) {
           <motion.div
             className="absolute top-0 left-0 h-full"
             style={{
-              background: 'linear-gradient(90deg, #7C3AED, #38BDF8, #EC4899)',
-              boxShadow: '0 0 8px rgba(124,58,237,0.9), 0 0 16px rgba(56,189,248,0.5)',
+              background: 'linear-gradient(90deg, #39FF14, #00F5D4, #10B981)',
+              boxShadow: '0 0 8px rgba(57,255,20,0.9), 0 0 16px rgba(0,245,212,0.5)',
             }}
             initial={{ width: '0%' }}
             animate={{ width: `${clampedPct}%` }}
@@ -40,8 +40,8 @@ export default function StreamProgressBar({ visible, progress }) {
             <motion.div
               className="absolute top-1/2 w-2 h-2 rounded-full"
               style={{
-                background: '#38BDF8',
-                boxShadow: '0 0 8px #38BDF8, 0 0 16px rgba(56,189,248,0.7)',
+                background: '#00F5D4',
+                boxShadow: '0 0 8px #00F5D4, 0 0 16px rgba(0,245,212,0.7)',
                 left: `${clampedPct}%`,
                 transform: 'translate(-50%, -50%)',
               }}
