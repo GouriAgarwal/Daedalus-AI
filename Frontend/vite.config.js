@@ -6,19 +6,27 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Proxy all backend calls so browser avoids CORS issues in dev.
-      // useSSE.js uses API_BASE = 'http://localhost:8000' directly,
-      // but these rules also cover relative-path usage.
+      // All backend API calls — proxied to avoid CORS in dev
       '/build-startup': {
-        target: 'http://localhost:8000',
+        target:      'http://127.0.0.1:8000',
         changeOrigin: true,
+        // SSE requires no timeout and no response buffering
+        timeout:     0,
+        proxyTimeout: 0,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            // Tell FastAPI not to buffer the event-stream
+            proxyReq.setHeader('Accept', 'text/event-stream')
+            proxyReq.setHeader('Cache-Control', 'no-cache')
+          })
+        },
       },
       '/export': {
-        target: 'http://localhost:8000',
+        target:      'http://127.0.0.1:8000',
         changeOrigin: true,
       },
       '/health': {
-        target: 'http://localhost:8000',
+        target:      'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

@@ -254,12 +254,12 @@ export function tailorFallbackForIdea(idea) {
       },
     },
     startup_score: {
-      feasibility:      7,
-      market_size:      7,
-      differentiation:  6,
-      team_fit:         7,
-      innovation:       6,
-      execution:        7,
+      feasibility:      Math.min(10, Math.max(4, 6 + (trimmed.length % 4))),
+      market_size:      Math.min(10, Math.max(4, 5 + (domain.length % 5))),
+      differentiation:  Math.min(10, Math.max(4, 4 + (trimmed.length % 6))),
+      team_fit:         Math.min(10, Math.max(4, 7 - (domain.length % 3))),
+      innovation:       Math.min(10, Math.max(4, 5 + (trimmed.length % 5))),
+      execution:        Math.min(10, Math.max(4, 6 + (domain.length % 4))),
     },
   }
 }

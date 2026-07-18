@@ -106,7 +106,7 @@ export const SCORE_METRICS = [
 /**
  * Backend base URL — reads from env, falls back to localhost.
  */
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+export const API_BASE = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : ''
 
 /**
  * FALLBACK_DATA — kept as empty neutral base.

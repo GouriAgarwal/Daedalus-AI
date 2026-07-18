@@ -287,12 +287,12 @@ def tailor_fallback_for_idea(idea: str, base: dict[str, Any] | None = None) -> d
     }
 
     sample["startup_score"] = sample.get("startup_score") or {
-        "feasibility": 7,
-        "market_size": 7,
-        "differentiation": 6,
-        "team_fit": 7,
-        "innovation": 6,
-        "execution": 7,
+        "feasibility":      min(10, max(4, 6 + (len(cleaned_idea) % 4))),
+        "market_size":      min(10, max(4, 5 + (len(domain) % 5))),
+        "differentiation":  min(10, max(4, 4 + (len(cleaned_idea) % 6))),
+        "team_fit":         min(10, max(4, 7 - (len(domain) % 3))),
+        "innovation":       min(10, max(4, 5 + (len(cleaned_idea) % 5))),
+        "execution":        min(10, max(4, 6 + (len(domain) % 4))),
     }
 
     return sample
