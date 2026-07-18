@@ -46,7 +46,7 @@ export default function Footer() {
         {/* Bottom divider */}
         <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-center justify-center">
           <p className="text-white/15 text-[11px] text-center">
-            © 2026 Daedalus-AI · Powered by hacksmiths
+            © 2026 Daedalus-AI · Powered by Hacksmiths
           </p>
         </div>
       </div>
