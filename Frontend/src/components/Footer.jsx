@@ -38,7 +38,7 @@ export default function Footer() {
 
           {/* Links */}
           <div className="flex items-center gap-3">
-            <FooterLink href="https://github.com" icon={<Github size={13} />} label="GitHub" />
+            <FooterLink href="https://github.com/GouriAgarwal/Daedalus-AI" icon={<Github size={13} />} label="GitHub" />
             <FooterLink href="#" icon={<ExternalLink size={13} />} label="Docs" />
           </div>
         </div>

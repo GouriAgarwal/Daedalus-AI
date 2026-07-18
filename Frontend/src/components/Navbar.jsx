@@ -61,7 +61,7 @@ export default function Navbar() {
           {/* Nav links */}
           <div className="flex items-center gap-2">
             <NavLink
-              href="https://github.com"
+              href="https://github.com/GouriAgarwal/Daedalus-AI"
               icon={<Github size={14} />}
               label="GitHub"
               external
