@@ -144,7 +144,11 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         <div className={`relative rounded-2xl transition-all duration-300 ${
           focused ? 'shadow-[0_0_0_1px_rgba(124,58,237,0.5),0_0_40px_rgba(124,58,237,0.12)]' : ''
         }`}
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ 
+            background: 'rgba(10, 15, 36, 0.60)', 
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)' 
+          }}
         >
           {/* Typing animation placeholder */}
           {!idea && !focused && (
