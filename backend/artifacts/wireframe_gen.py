@@ -240,7 +240,7 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
         )
 
     flows_html = "".join(
-        f'<li class="flex items-start gap-2 text-xs text-white/35 leading-relaxed">'
+        f'<li class="flex items-start gap-2 text-xs text-white/65 leading-relaxed">'
         f'<span style="color:{accent}; flex-shrink:0">›</span>{f}</li>\n'
         for f in flows
     )
@@ -284,7 +284,7 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
       </div>
       <div>
         <div class="text-white font-semibold text-sm leading-tight">{label}</div>
-        <div class="text-white/30 text-xs">Wireframe Preview</div>
+        <div class="text-white/60 text-xs">Wireframe Preview</div>
       </div>
     </div>
     <div class="flex items-center gap-3">
@@ -300,7 +300,7 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="px-3 mb-4">
-        <p class="text-white/25 text-[10px] font-semibold uppercase tracking-widest px-2 mb-2">Navigation</p>
+        <p class="text-white/50 text-[10px] font-semibold uppercase tracking-widest px-2 mb-2">Navigation</p>
         <div class="flex flex-col gap-1">
           {nav_items}
         </div>
@@ -308,7 +308,7 @@ def _generate_from_template(ui_spec: dict, idea: str) -> str:
 
       <!-- User Flows -->
       <div class="mt-auto px-3 pt-4 border-t border-white/5">
-        <p class="text-white/25 text-[10px] font-semibold uppercase tracking-widest px-2 mb-2">Key Flows</p>
+        <p class="text-white/50 text-[10px] font-semibold uppercase tracking-widest px-2 mb-2">Key Flows</p>
         <ul class="space-y-2 px-1">{flows_html}</ul>
       </div>
     </aside>
@@ -339,7 +339,7 @@ body{{background:linear-gradient(135deg,#0a0f1e 0%,#0f172a 60%,#1a1f3a 100%);min
 .main-area{{margin-left:220px;flex:1;padding:1.75rem;overflow-y:auto;}}
 .logo-mark{{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white;}}
 .avatar{{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;cursor:pointer;}}
-.btn-ghost{{background:transparent;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:6px 8px;border-radius:8px;font-size:15px;transition:all 0.2s;}}
+.btn-ghost{{background:transparent;border:none;color:rgba(255,255,255,0.75);cursor:pointer;padding:6px 8px;border-radius:8px;font-size:15px;transition:all 0.2s;}}
 .btn-ghost:hover{{background:rgba(255,255,255,0.08);color:white;}}
 .nav-item.active{{background:linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04)) !important;color:white !important;border-left:2px solid {primary};}}
 .screen-panel{{display:none;animation:fadeIn 0.3s ease;}}
@@ -361,10 +361,10 @@ body{{background:linear-gradient(135deg,#0a0f1e 0%,#0f172a 60%,#1a1f3a 100%);min
 .badge-amber{{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.25);}}
 .data-input{{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:white;padding:0.55rem 0.875rem;border-radius:10px;width:100%;outline:none;font-size:0.8125rem;transition:border-color 0.2s;}}
 .data-input:focus{{border-color:{primary};box-shadow:0 0 0 3px {primary}22;}}
-.data-input::placeholder{{color:rgba(255,255,255,0.25);}}
+.data-input::placeholder{{color:rgba(255,255,255,0.5);}}
 .data-table{{width:100%;border-collapse:collapse;}}
-.data-table th{{padding:0.65rem 1rem;text-align:left;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.3);border-bottom:1px solid rgba(255,255,255,0.06);}}
-.data-table td{{padding:0.75rem 1rem;font-size:0.8125rem;color:rgba(255,255,255,0.75);border-bottom:1px solid rgba(255,255,255,0.04);}}
+.data-table th{{padding:0.65rem 1rem;text-align:left;font-size:0.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.65);border-bottom:1px solid rgba(255,255,255,0.12);}}
+.data-table td{{padding:0.75rem 1rem;font-size:0.8125rem;color:rgba(255,255,255,0.9);border-bottom:1px solid rgba(255,255,255,0.06);}}
 .data-row{{transition:background 0.15s;cursor:pointer;}}
 .data-row:hover{{background:rgba(255,255,255,0.04);}}
 .modal-overlay{{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;}}
@@ -373,10 +373,10 @@ body{{background:linear-gradient(135deg,#0a0f1e 0%,#0f172a 60%,#1a1f3a 100%);min
 @keyframes modalIn{{from{{opacity:0;transform:scale(0.95)translateY(10px)}}to{{opacity:1;transform:scale(1)translateY(0)}}}}
 .modal-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}}
 .modal-title{{font-size:1rem;font-weight:700;color:white;}}
-.modal-close{{background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}}
+.modal-close{{background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.7);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}}
 .modal-close:hover{{background:rgba(239,68,68,0.2);color:#f87171;}}
 .form-group{{margin-bottom:0.875rem;}}
-.form-label{{display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.04em;}}
+.form-label{{display:block;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.75);margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.04em;}}
 #toast-container{{position:fixed;top:68px;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:8px;}}
 .toast{{display:flex;align-items:center;gap:10px;padding:0.75rem 1.1rem;border-radius:12px;font-size:0.8125rem;font-weight:500;min-width:220px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:toastIn 0.3s ease forwards;}}
 .toast.removing{{animation:toastOut 0.3s ease forwards;}}
@@ -473,11 +473,11 @@ def _kpi_cards(screen_name: str, idea: str, primary: str, accent: str) -> str:
         cards += (
             f'<div class="glass-card">'
             f'<div class="flex items-start justify-between mb-3">'
-            f'<span class="text-white/40 text-xs font-semibold uppercase tracking-wide">{label}</span>'
+            f'<span class="text-white/70 text-xs font-semibold uppercase tracking-wide">{label}</span>'
             f'<span class="text-xs font-medium" style="color:{color}">{arrow} {change}</span>'
             f'</div>'
             f'<div class="kpi-value" style="color:{color}">{val}</div>'
-            f'<div class="text-white/30 text-xs mt-1">{sub}</div>'
+            f'<div class="text-white/60 text-xs mt-1">{sub}</div>'
             f'</div>'
         )
     return f'<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">{cards}</div>'
@@ -539,8 +539,8 @@ def _data_table(sid: str, screen_name: str, idea: str, primary: str, accent: str
             f'{name[0]}</div>'
             f'<span class="font-medium text-white">{name}</span></div></td>'
             f'<td><span class="badge {badge_cls}">{status}</span></td>'
-            f'<td><span class="text-white/50">{priority}</span></td>'
-            f'<td><span class="text-white/35 text-xs">{time}</span></td>'
+            f'<td><span class="text-white/80">{priority}</span></td>'
+            f'<td><span class="text-white/65 text-xs">{time}</span></td>'
             f'<td><div class="flex gap-2">'
             f'<button class="btn-ghost" onclick="openModal(\'modal-view\')" title="View">👁</button>'
             f'<button class="btn-ghost" onclick="showToast(\'Deleted!\', \'error\')" title="Delete">🗑</button>'
@@ -579,7 +579,7 @@ def _search_bar_standalone(sid: str, screen_name: str, idea: str) -> str:
 
 def _calendar_widget(screen_name: str, primary: str) -> str:
     days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    day_headers = "".join(f'<div class="text-white/25 text-xs text-center font-medium py-1">{d}</div>' for d in days)
+    day_headers = "".join(f'<div class="text-white/55 text-xs text-center font-medium py-1">{d}</div>' for d in days)
     cells = ""
     for i in range(35):
         day_num = (i % 28) + 1
@@ -589,7 +589,7 @@ def _calendar_widget(screen_name: str, primary: str) -> str:
         elif i in (3, 4, 10, 17):
             style = "background:rgba(16,185,129,0.2);color:#10b981;"
         else:
-            style = "color:rgba(255,255,255,0.4);"
+            style = "color:rgba(255,255,255,0.7);"
         cells += (
             f'<div class="text-xs text-center py-1.5 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"'
             f' style="{style}" onclick="showToast(\'Day {day_num} selected\', \'info\')">{day_num}</div>'
@@ -605,9 +605,9 @@ def _calendar_widget(screen_name: str, primary: str) -> str:
         f'</div></div>'
         f'<div class="grid grid-cols-7 gap-1">{day_headers}{cells}</div>'
         f'<div class="flex gap-4 mt-4 pt-3 border-t border-white/5">'
-        f'<span class="flex items-center gap-1.5 text-xs text-white/40">'
+        f'<span class="flex items-center gap-1.5 text-xs text-white/70">'
         f'<span class="w-3 h-3 rounded" style="background:{primary}33;"></span>Scheduled</span>'
-        f'<span class="flex items-center gap-1.5 text-xs text-white/40">'
+        f'<span class="flex items-center gap-1.5 text-xs text-white/70">'
         f'<span class="w-3 h-3 rounded bg-emerald-500/20"></span>Completed</span>'
         f'</div></div>'
     )
@@ -671,10 +671,10 @@ def _generic_widget(label: str, idea: str, primary: str) -> str:
         f'<span class="text-white font-semibold text-sm">{label}</span>'
         f'<button class="badge badge-blue" onclick="showToast(\'{label} updated!\', \'success\')">Refresh</button>'
         f'</div>'
-        f'<p class="text-white/35 text-xs leading-relaxed">'
+        f'<p class="text-white/65 text-xs leading-relaxed">'
         f'Tailored for: <em>{idea[:60]}</em></p>'
-        f'<div class="mt-3 h-12 rounded-lg border border-white/5 flex items-center'
-        f' justify-center text-white/20 text-xs">Interactive content area</div>'
+        f'<div class="mt-3 h-12 rounded-lg border border-white/10 flex items-center'
+        f' justify-center text-white/55 text-xs">Interactive content area</div>'
         f'</div>'
     )
 
@@ -724,18 +724,18 @@ def _build_modals(screens: list, idea: str, primary: str, accent: str) -> str:
         f'</div>'
         f'<div class="space-y-3">'
         f'<div class="flex justify-between py-2 border-b border-white/5">'
-        f'<span class="text-white/40 text-sm">Name</span>'
+        f'<span class="text-white/70 text-sm">Name</span>'
         f'<span class="text-white text-sm font-medium">{first_screen} Alpha</span></div>'
         f'<div class="flex justify-between py-2 border-b border-white/5">'
-        f'<span class="text-white/40 text-sm">Status</span>'
+        f'<span class="text-white/70 text-sm">Status</span>'
         f'<span class="badge badge-green">Active</span></div>'
         f'<div class="flex justify-between py-2 border-b border-white/5">'
-        f'<span class="text-white/40 text-sm">Created</span>'
+        f'<span class="text-white/70 text-sm">Created</span>'
         f'<span class="text-white text-sm">Jul 15, 2025</span></div>'
         f'<div class="flex justify-between py-2 border-b border-white/5">'
-        f'<span class="text-white/40 text-sm">Related Idea</span>'
+        f'<span class="text-white/70 text-sm">Related Idea</span>'
         f'<span class="text-white text-sm">{idea[:40]}</span></div>'
-        f'<div class="py-2"><span class="text-white/40 text-sm block mb-1">Description</span>'
+        f'<div class="py-2"><span class="text-white/70 text-sm block mb-1">Description</span>'
         f'<p class="text-white/70 text-sm leading-relaxed">'
         f'Core component of the {first_screen.lower()} module. Handles primary business logic and'
         f' integrations for this startup.</p></div>'
