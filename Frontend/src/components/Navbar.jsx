@@ -44,7 +44,7 @@ export default function Navbar() {
 
             <div className="flex flex-col leading-none">
               <span className="text-white font-semibold text-sm tracking-tight">
-                AI Co-Founder
+                Daedalus-AI
               </span>
               <span className="text-white/40 text-[10px] tracking-widest uppercase">
                 Startup Validator

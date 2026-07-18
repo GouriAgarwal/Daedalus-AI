@@ -22,7 +22,7 @@ export default function Footer() {
                 style={{ background: 'linear-gradient(135deg, #7C3AED, #38BDF8)' }}>
                 <Zap size={14} className="text-white" fill="white" />
               </div>
-              <span className="text-white font-semibold text-sm">AI Co-Founder Team</span>
+              <span className="text-white font-semibold text-sm">Daedalus-AI</span>
             </div>
             <p className="text-white/30 text-xs max-w-xs text-center md:text-left leading-relaxed">
               Multi-agent AI startup validator. Built for hackathons, designed for founders.
