@@ -5,11 +5,11 @@
 import { useEffect, useRef } from 'react'
 
 const BLOBS = [
-  { color: 'rgba(57, 255, 20, 0.45)', size: 700, x: '10%',  y: '20%',  delay: '0s',    duration: '14s' },
-  { color: 'rgba(0, 245, 212, 0.45)', size: 500, x: '75%',  y: '10%',  delay: '2s',    duration: '18s' },
-  { color: 'rgba(16, 185, 129, 0.35)', size: 400, x: '60%',  y: '60%',  delay: '4s',    duration: '12s' },
-  { color: 'rgba(57, 255, 20, 0.35)', size: 350, x: '20%',  y: '75%',  delay: '6s',    duration: '20s' },
-  { color: 'rgba(0, 245, 212, 0.35)', size: 300, x: '85%',  y: '80%',  delay: '3s',    duration: '16s' },
+  { color: '#7C3AED', size: 700, x: '10%',  y: '20%',  delay: '0s',    duration: '14s' },
+  { color: '#38BDF8', size: 500, x: '75%',  y: '10%',  delay: '2s',    duration: '18s' },
+  { color: '#EC4899', size: 400, x: '60%',  y: '60%',  delay: '4s',    duration: '12s' },
+  { color: '#7C3AED', size: 350, x: '20%',  y: '75%',  delay: '6s',    duration: '20s' },
+  { color: '#22C55E', size: 300, x: '85%',  y: '80%',  delay: '3s',    duration: '16s' },
 ]
 
 export default function AnimatedBackground() {
@@ -39,15 +39,72 @@ export default function AnimatedBackground() {
     let animFrame
     let tick = 0
 
+    const comets = []
+
     function drawStars() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      // Update and draw background stars
       stars.forEach((star) => {
+        // Drift slowly in space flow
+        star.x += Math.cos(star.phase) * 0.08
+        star.y -= Math.sin(star.phase) * 0.08
+        
+        // Wrap around viewport boundaries
+        if (star.x < 0) star.x = canvas.width
+        if (star.x > canvas.width) star.x = 0
+        if (star.y < 0) star.y = canvas.height
+        if (star.y > canvas.height) star.y = 0
+
         const alpha = star.alpha * (0.6 + 0.4 * Math.sin(tick * star.speed + star.phase))
         ctx.beginPath()
         ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(255,255,255,${alpha})`
         ctx.fill()
       })
+
+      // Randomly spawn a cyber comet shooting star (colored in brand colors)
+      if (Math.random() < 0.007 && comets.length < 3) {
+        comets.push({
+          x: Math.random() * (canvas.width * 0.5),
+          y: Math.random() * (canvas.height * 0.5),
+          vx: Math.random() * 3 + 2.5,
+          vy: Math.random() * 1.5 + 1.2,
+          length: Math.random() * 60 + 30,
+          alpha: 1,
+          color: Math.random() < 0.5 ? '#6366f1' : '#00f5d4'
+        })
+      }
+
+      // Update and draw comets
+      for (let i = comets.length - 1; i >= 0; i--) {
+        const c = comets[i]
+        c.x += c.vx
+        c.y += c.vy
+        c.alpha -= 0.01
+
+        if (c.alpha <= 0 || c.x > canvas.width || c.y > canvas.height) {
+          comets.splice(i, 1)
+          continue
+        }
+
+        // Draw glowing comet trail line
+        const grad = ctx.createLinearGradient(
+          c.x, c.y, 
+          c.x - c.vx * (c.length / 5), 
+          c.y - c.vy * (c.length / 5)
+        )
+        grad.addColorStop(0, `rgba(${c.color === '#6366f1' ? '99,102,241' : '0,245,212'},${c.alpha})`)
+        grad.addColorStop(1, 'rgba(0,0,0,0)')
+
+        ctx.beginPath()
+        ctx.strokeStyle = grad
+        ctx.lineWidth = 1.5
+        ctx.moveTo(c.x, c.y)
+        ctx.lineTo(c.x - c.vx * (c.length / 5), c.y - c.vy * (c.length / 5))
+        ctx.stroke()
+      }
+
       tick += 0.02
       animFrame = requestAnimationFrame(drawStars)
     }
@@ -93,7 +150,7 @@ export default function AnimatedBackground() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #030712 100%)',
+          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #050816 100%)',
         }}
       />
     </div>
