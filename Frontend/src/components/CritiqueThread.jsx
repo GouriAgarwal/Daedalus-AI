@@ -138,7 +138,8 @@ function CritiqueBubble({ type, text, index }) {
       <div
         className="rounded-xl p-4 transition-all duration-200 hover:translate-x-1"
         style={{
-          background:   cfg.bgColor,
+          background:   'rgba(10, 15, 36, 0.60)',
+          backdropFilter: 'blur(12px)',
           border:       `1px solid ${cfg.borderColor}`,
         }}
       >
@@ -193,7 +194,11 @@ function RevisionBlock({ agentKey, revision, index }) {
 
       <div
         className="rounded-xl overflow-hidden"
-        style={{ border: `1px solid ${cfg.color}33` }}
+        style={{ 
+          background: 'rgba(10, 15, 36, 0.60)',
+          backdropFilter: 'blur(12px)',
+          border: `1px solid ${cfg.color}33` 
+        }}
       >
         {/* Header */}
         <div
