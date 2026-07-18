@@ -113,6 +113,7 @@ QUALITY GATES (review before returning):
 
 Return ONLY valid JSON matching this EXACT structure (no extra keys, no markdown):
 {
+  "startup_name": "A premium, catchy, creative, and professional brand name for this startup (e.g. Daedalus, Stripe, Linear style)",
   "domain": "Short industry label — e.g. Pet Care / EdTech / FinTech / HealthTech",
   "idea_context": {
     "domain": "Same as above",

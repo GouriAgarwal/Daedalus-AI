@@ -211,7 +211,7 @@ async def _generate_artifacts(session_id: str, pipeline_result: dict) -> None:
     session_dir = SESSIONS_DIR / session_id
     session_dir.mkdir(parents=True, exist_ok=True)
 
-    idea        = pipeline_result.get("idea", "startup")
+    idea        = pipeline_result.get("startup_name") or pipeline_result.get("idea", "startup")
     ui_spec     = pipeline_result.get("round1", {}).get("ui", {})
     backend_spec= pipeline_result.get("round1", {}).get("backend", {})
 
@@ -317,7 +317,7 @@ async def export_wireframe(id: str = Query(..., description="Session ID from the
         if not result:
             raise HTTPException(status_code=404, detail="Session not found. Run /build-startup first.")
         ui_spec = result.get("round1", {}).get("ui", {})
-        idea    = result.get("idea", "startup")
+        idea    = result.get("startup_name") or result.get("idea", "startup")
         from artifacts.wireframe_gen import _generate_from_template
         html = _generate_from_template(ui_spec, idea)
         file_path.write_text(html, encoding="utf-8")
@@ -338,7 +338,7 @@ async def export_code_skeleton(id: str = Query(..., description="Session ID from
         if not result:
             raise HTTPException(status_code=404, detail="Session not found. Run /build-startup first.")
         backend_spec = result.get("round1", {}).get("backend", {})
-        idea         = result.get("idea", "startup")
+        idea         = result.get("startup_name") or result.get("idea", "startup")
         file_path.parent.mkdir(parents=True, exist_ok=True)
         await asyncio.to_thread(generate_code_skeleton, backend_spec, idea, file_path.parent)
 

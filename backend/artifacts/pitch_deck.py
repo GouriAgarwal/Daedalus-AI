@@ -172,7 +172,7 @@ def generate_pitch_deck(pipeline_result: dict[str, Any]) -> bytes:
     prs.slide_width  = SLIDE_W
     prs.slide_height = SLIDE_H
 
-    idea    = pipeline_result.get("idea", "Your Startup")
+    idea    = pipeline_result.get("startup_name") or pipeline_result.get("idea", "Your Startup")
     domain  = pipeline_result.get("domain", "SaaS")
     r1      = pipeline_result.get("round1", {})
     pm      = r1.get("pm", {})
