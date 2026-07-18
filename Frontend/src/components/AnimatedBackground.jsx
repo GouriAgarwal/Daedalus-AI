@@ -166,10 +166,12 @@ export default function AnimatedBackground() {
             scaleMobile: 1.00,
             color: 0x00f5d4,          // Neon Cyan nodes
             backgroundColor: 0x050816, // Matches #050816 deep navy
-            points: 10.00,             // Number of node points
-            maxDistance: 20.00,        // Range of links
-            spacing: 16.00,            // Network density
-            showDots: true
+            points: 15.00,             // More node points
+            maxDistance: 24.00,        // Wider range of links to follow mouse
+            spacing: 14.00,            // Denser network grid
+            showDots: true,
+            mouseCoeff: 4.0,           // Very high hover response/sensitivity coefficient!
+            speed: 2.0                 // Dynamic wave propagation speed
           })
           setVantaInitialized(true)
           console.log('[vanta] Vanta.NET initialized successfully!')
