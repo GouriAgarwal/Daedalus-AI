@@ -103,8 +103,8 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         transition={{ delay: 0.1 }}
         className="flex items-center justify-center gap-2 mb-6"
       >
-        <span className="px-3 py-1 rounded-full text-xs font-medium border border-[#39FF14]/30 bg-[#39FF14]/10 text-[#75FF5B] flex items-center gap-1.5 shadow-[0_0_15px_rgba(57,255,20,0.1)]">
-          <Lightbulb size={11} className="text-[#39FF14]" />
+        <span className="px-3 py-1 rounded-full text-xs font-medium border border-purple-500/30 bg-purple-500/10 text-purple-300 flex items-center gap-1.5">
+          <Lightbulb size={11} />
           Describe your startup idea
         </span>
       </motion.div>
@@ -117,15 +117,15 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         className="text-center mb-8"
       >
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-          <span className="text-white">Your Idea,</span>
+          <span className="text-white">Daedalus-AI:</span>
           <br />
           <span style={{
-            background: 'linear-gradient(135deg, #39FF14 0%, #00F5D4 50%, #10B981 100%)',
+            background: 'linear-gradient(135deg, #00f5d4 0%, #38BDF8 50%, #7C3AED 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-          }} className="drop-shadow-[0_0_30px_rgba(57,255,20,0.2)]">
-            Stress-Tested
+          }}>
+            Your Idea, Engineered
           </span>
         </h1>
         <p className="mt-4 text-white/50 text-lg max-w-xl mx-auto leading-relaxed">
@@ -142,9 +142,9 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
         className="relative"
       >
         <div className={`relative rounded-2xl transition-all duration-300 ${
-          focused ? 'shadow-[0_0_0_1px_rgba(57,255,20,0.5),0_0_40px_rgba(57,255,20,0.15)]' : ''
+          focused ? 'shadow-[0_0_0_1px_rgba(124,58,237,0.5),0_0_40px_rgba(124,58,237,0.12)]' : ''
         }`}
-          style={{ background: 'rgba(6,12,28,0.65)', border: focused ? '1px solid rgba(57,255,20,0.4)' : '1px solid rgba(57,255,20,0.15)' }}
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           {/* Typing animation placeholder */}
           {!idea && !focused && (
@@ -179,7 +179,7 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
                   <circle
                     cx="12" cy="12" r="9"
                     fill="none"
-                    stroke={overLimit ? '#EF4444' : pct > 80 ? '#F59E0B' : '#39FF14'}
+                    stroke={overLimit ? '#EF4444' : pct > 80 ? '#F59E0B' : '#7C3AED'}
                     strokeWidth="2"
                     strokeDasharray={`${56.5 * pct / 100} 56.5`}
                     strokeLinecap="round"
@@ -226,16 +226,15 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
                     disabled={!idea.trim() || overLimit}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    className="btn-ripple flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold
-                               disabled:opacity-40 disabled:cursor-not-allowed
+                    className="btn-ripple flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold
+                               text-white disabled:opacity-40 disabled:cursor-not-allowed
                                transition-all duration-200"
                     style={{
                       background: idea.trim() && !overLimit
-                        ? 'linear-gradient(135deg, #39FF14, #00F5D4)'
+                        ? 'linear-gradient(135deg, #7C3AED, #38BDF8)'
                         : 'rgba(255,255,255,0.08)',
-                      color: idea.trim() && !overLimit ? '#030712' : 'rgba(255,255,255,0.4)',
                       boxShadow: idea.trim() && !overLimit
-                        ? '0 0 25px rgba(57,255,20,0.5)'
+                        ? '0 0 20px rgba(124,58,237,0.4)'
                         : 'none',
                     }}
                     aria-label="Generate startup analysis"
@@ -268,7 +267,7 @@ export default function InputBar({ onSubmit, isLoading, onReset }) {
             whileTap={{ scale: 0.97 }}
             className="px-3 py-1 rounded-full text-xs font-medium
                        bg-white/[0.05] border border-white/[0.08] text-white/50
-                       hover:text-white hover:bg-white/[0.09] hover:border-[#39FF14]/40
+                       hover:text-white hover:bg-white/[0.09] hover:border-purple-500/40
                        disabled:opacity-40 disabled:cursor-not-allowed
                        transition-all duration-200"
           >
