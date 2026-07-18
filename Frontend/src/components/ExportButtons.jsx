@@ -12,8 +12,8 @@ const EXPORT_CARDS = [
   {
     id:          'pitch-deck',
     title:       'Pitch Deck',
-    subtitle:    '12-slide investor presentation',
-    description: 'Problem · Solution · Market · Competition · Tech · Go-To-Market · Score · Ask',
+    subtitle:    '8-slide investor presentation',
+    description: 'Problem · Solution · Market · Traction · Team · Tech · Roadmap · Ask',
     icon:        FileText,
     color:       '#7C3AED',
     colorLight:  'rgba(124,58,237,0.15)',
